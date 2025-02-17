@@ -14,7 +14,7 @@ export default function HomePage() {
       >
         <div className="absolute inset-0 bg-black bg-opacity-40"></div>
         <div className="p-6 max-w-6xl mx-auto relative z-50 w-full text-center">
-          <h1 className="text-5xl md:text-8xl font-extrabold text-gray-300 animate-fade-in">
+          <h1 className="text-5xl md:text-8xl font-ptsans font-extrabold text-gray-300 animate-fade-in">
             Secrets of Flowers
           </h1>
           <p className="mt-6 font-medium text-lg md:text-xl font-quicksand text-gray-100 max-w-2xl mx-auto leading-relaxed">

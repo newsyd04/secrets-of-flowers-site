@@ -7,7 +7,8 @@ export default {
         poiret: ["Poiret One", "cursive"],
         quicksand: ["Quicksand", "serif"],
         comforter: ["Comforter Brush", "serif"],
-        Italianno: ["Italianno", "serif"]
+        Italianno: ["Italianno", "serif"],
+        ptsans: ["PT Sans", "serif"]
       },
     },
   },
