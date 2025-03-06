@@ -27,7 +27,7 @@ export default function UploadPage() {
 
   const fetchImages = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/images");
+      const res = await axios.get("https://secrets-of-flowers-site.onrender.com/images");
       setImages(res.data);
     } catch (error) {
       console.error("Error fetching images:", error);
@@ -45,7 +45,7 @@ export default function UploadPage() {
 
     try {
       const token = localStorage.getItem("token");
-      const res = await axios.post("http://localhost:5000/upload", formData, {
+      const res = await axios.post("https://secrets-of-flowers-site.onrender.com/upload", formData, {
         headers: { Authorization: token },
       });
       setImages([...images, res.data]);

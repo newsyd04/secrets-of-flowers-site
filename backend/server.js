@@ -12,8 +12,13 @@ import nodemailer from "nodemailer";
 
 dotenv.config();
 const app = express();
-app.use(cors());
 app.use(express.json());
+
+app.use(cors({
+    origin: ["https://newsyd04.github.io", "https://your-frontend.com"], // Add allowed origins
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    allowedHeaders: ["Content-Type", "Authorization"]
+  }));
 
 // Configure Cloudinary
 cloudinary.v2.config({

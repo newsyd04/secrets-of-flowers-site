@@ -10,7 +10,7 @@ export default function BookingPage() {
 
   const handleBooking = async () => {
     try {
-      const res = await axios.post("http://localhost:5000/book", { date, time, email });
+      const res = await axios.post("https://secrets-of-flowers-site.onrender.com/book", { date, time, email });
       alert(res.data.message);
     } catch (error) {
       console.error("Booking error:", error);

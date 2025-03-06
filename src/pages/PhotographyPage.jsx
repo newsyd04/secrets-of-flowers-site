@@ -8,7 +8,7 @@ export default function PhotographyPage() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    axios.get("http://localhost:5000/images").then((res) => setArtworks(res.data));
+    axios.get("https://secrets-of-flowers-site.onrender.com/images").then((res) => setArtworks(res.data));
   }, []);
 
   useEffect(() => {

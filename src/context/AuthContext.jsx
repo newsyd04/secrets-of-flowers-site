@@ -16,7 +16,7 @@ export function AuthProvider({ children }) {
 
   const login = async (username, password) => {
     try {
-      const res = await axios.post("http://localhost:5000/login", { username, password });
+      const res = await axios.post("https://secrets-of-flowers-site.onrender.com/login", { username, password });
       localStorage.setItem("token", res.data.token);
       axios.defaults.headers.common["Authorization"] = res.data.token;
       setUser({ token: res.data.token });
