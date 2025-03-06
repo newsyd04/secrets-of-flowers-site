@@ -1,10 +1,15 @@
 "use client";
 import React from "react";
+import { useEffect } from "react";
 import "@fortawesome/fontawesome-free/css/all.min.css";
 import bg from "../assets/painting-bg.jpg"
 import { Link } from "react-router-dom";
 
 export default function HomePage() {
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   return (
     <>
       {/* Hero Section */}

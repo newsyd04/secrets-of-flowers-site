@@ -52,6 +52,8 @@ export default function Navbar({ mode = "light" }) {
           <ul className={`hidden md:flex absolute left-1/2 transform -translate-x-1/2 space-x-10 text-xl font-medium font-quicksand items-center text-white`}>
             <li><Link to="/about" className="cursor-pointer transition decoration-2 underline-offset-4 decoration-gray-400 hover:underline">About Me</Link></li>
             <li><Link to="/photography" className="cursor-pointer transition decoration-2 underline-offset-4 decoration-gray-400 hover:underline">Photography</Link></li>            
+            <li><Link to="/booking" className="cursor-pointer transition decoration-2 underline-offset-4 decoration-gray-400 hover:underline">Bookings</Link></li>
+            <li><Link to="/login" className="cursor-pointer transition decoration-2 underline-offset-4 decoration-gray-400 hover:underline">Login</Link></li>
             <li><Link to="/contact" className="cursor-pointer transition decoration-2 underline-offset-4 decoration-gray-400 hover:underline">Contact</Link></li>
           </ul>
         </div>
@@ -67,7 +69,7 @@ export default function Navbar({ mode = "light" }) {
           </button>
 
           {/* "Secrets of Flowers" - Always Centered in Menu */}
-          <div className="absolute text-4xl font-Italianno top-8 left-1/2 transform -translate-x-1/2 text-gray-900 font-semibold">
+          <div onClick={() => handleNavigation("/")} className="cursor-pointer absolute text-4xl font-Italianno top-8 left-1/2 transform -translate-x-1/2 text-white font-semibold">
             Secrets of Flowers
           </div>
 
@@ -75,6 +77,8 @@ export default function Navbar({ mode = "light" }) {
           <ul className="text-gray-900 text-center text-3xl space-y-8 font-quicksand absolute bottom-1/2 transform translate-y-1/2">
             <li><span onClick={() => handleNavigation("/about", "light")} className="cursor-pointer decoration-2 underline-offset-4 decoration-gray-400 hover:underline hover:text-gray-700 transition">About Me</span></li>
             <li><span onClick={() => handleNavigation("/photography", "light")} className="cursor-pointer decoration-2 underline-offset-4 decoration-gray-400 hover:underline hover:text-gray-700 transition">Photography</span></li>            
+            <li><span onClick={() => handleNavigation("/booking", "light")} className="cursor-pointer decoration-2 underline-offset-4 decoration-gray-400 hover:underline hover:text-gray-700 transition">Bookings</span></li>
+            <li><span onClick={() => handleNavigation("/login", "light")} className="cursor-pointer decoration-2 underline-offset-4 decoration-gray-400 hover:underline hover:text-gray-700 transition">Login</span></li>
             <li><span onClick={() => handleNavigation("/contact", "light")} className="cursor-pointer decoration-2 underline-offset-4 decoration-gray-400 hover:underline hover:text-gray-700 transition">Contact</span></li>
           </ul>
         </div>

@@ -1,8 +1,13 @@
 "use client";
+import { useEffect } from "react";
 import React from "react";
 import mairead1 from "../assets/mairead1.jpg";
 
 export default function AboutPage() {
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+  
   return (
     <div className="min-h-screen py-48 font-quicksand bg-[#abbd9a]">
       <hr className="w-32 mx-auto mb-8 border-t-4 border-gray-400 opacity-75" />

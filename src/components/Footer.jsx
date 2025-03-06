@@ -1,5 +1,5 @@
 import React from "react";
-import {Link} from "react-router-dom"
+import { Link } from "react-router-dom";
 
 export default function Footer() {
   return (
@@ -19,10 +19,11 @@ export default function Footer() {
           <div>
             <h3 className="text-xl font-bold mb-4">Quick Links</h3>
             <ul className="space-y-2">
-              <li><Link to="./" className="hover:text-gray-300 transition">Home</Link></li>
-              <li><Link to="./about" className="hover:text-gray-300 transition">About Me</Link></li>
-              <li><Link to="./photography" className="hover:text-gray-300 transition">Artworks</Link></li>
-              <li><Link to="./contact" className="hover:text-gray-300 transition">Contact</Link></li>
+              <li><Link to="/" className="hover:text-gray-300 transition">Home</Link></li>
+              <li><Link to="/about" className="hover:text-gray-300 transition">About Me</Link></li>
+              <li><Link to="/photography" className="hover:text-gray-300 transition">Artworks</Link></li>
+              <li><Link to="/contact" className="hover:text-gray-300 transition">Contact</Link></li>
+              <li><Link to="/login" className="hover:text-gray-300 transition">Login</Link></li>
             </ul>
           </div>
 
@@ -31,7 +32,11 @@ export default function Footer() {
             <h3 className="text-xl font-bold mb-4">Contact</h3>
             <p className="text-gray-400">📍 Tralee, Co. Kerry, Ireland</p>
             <p className="text-gray-400">📞 +123-456-7890</p>
-            <p className="text-gray-400">✉️ <a href="mailto:mairead@secretsofflowers.com" className="hover:text-gray-300">mairead@secretsofflowers.com</a></p>
+            <p className="text-gray-400">
+              ✉️ <a href="mailto:mairead@secretsofflowers.com" className="hover:text-gray-300">
+                mairead@secretsofflowers.com
+              </a>
+            </p>
           </div>
 
         </div>
@@ -42,6 +47,13 @@ export default function Footer() {
         {/* Bottom Section */}
         <div className="flex flex-col md:flex-row items-center justify-between text-gray-400">
           <p>© {new Date().getFullYear()} Secrets of Flowers. All rights reserved.</p>
+          
+          {/* Designed by Dara Newsome */}
+          <p className="text-sm mt-4 md:mt-0">
+            Designed & Developed by <a href="https://daranewso.me" target="_blank" rel="noopener noreferrer" className="hover:text-gray-300 font-semibold">Dara Newsome</a>
+          </p>
+
+          {/* Social Media Icons */}
           <div className="flex space-x-6 mt-4 md:mt-0">
             <a href="#" className="hover:text-gray-300"><i className="fa-brands fa-facebook text-2xl"></i></a>
             <a href="#" className="hover:text-gray-300"><i className="fa-brands fa-instagram text-2xl"></i></a>

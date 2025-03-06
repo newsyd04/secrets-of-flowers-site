@@ -1,7 +1,13 @@
 "use client";
 import React from "react";
+import { useEffect } from "react";
 
 export default function ContactPage() {
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   return (
     <div className="min-h-screen font-quicksand bg-[#abbd9a] py-48 px-6 flex items-center justify-center">
       <div className="max-w-xl bg-white rounded-3xl shadow-2xl p-10 text-center">
