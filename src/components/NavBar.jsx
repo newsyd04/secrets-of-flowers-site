@@ -1,11 +1,12 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { useNavigate, Link } from "react-router-dom"; // React Router for navigation
-import logo from "../assets/art-logo.jpg";
+import { AuthContext } from "../context/AuthContext"; // Import AuthContext
 
 export default function Navbar({ mode = "light" }) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [theme, setTheme] = useState(mode); // Default to the passed mode
   const navigate = useNavigate(); // React Router navigation
+  const { isAuthenticated } = useContext(AuthContext); // Get auth state
 
   // Disable scrolling when menu is open
   useEffect(() => {
@@ -37,14 +38,14 @@ export default function Navbar({ mode = "light" }) {
           {/* Mobile - Centered "Secrets of Flowers" */}
           <div className="md:hidden absolute left-1/2 transform -translate-x-1/2 text-lg font-bold">
             <Link to="/" className={`text-4xl font-Italianno cursor-pointer font-semibold text-white`}>
-            Secrets of Flowers
+              Secrets of Flowers
             </Link>
           </div>
 
           {/* Desktop - "Secrets of Flowers" on Left */}
           <div className="hidden md:flex text-lg font-bold py-4">
             <Link to="/" className={`text-4xl font-Italianno cursor-pointer font-semibold text-white`}>
-            Secrets of Flowers
+              Secrets of Flowers
             </Link>
           </div>
 
@@ -53,7 +54,13 @@ export default function Navbar({ mode = "light" }) {
             <li><Link to="/about" className="cursor-pointer transition decoration-2 underline-offset-4 decoration-gray-400 hover:underline">About Me</Link></li>
             <li><Link to="/photography" className="cursor-pointer transition decoration-2 underline-offset-4 decoration-gray-400 hover:underline">Photography</Link></li>            
             <li><Link to="/booking" className="cursor-pointer transition decoration-2 underline-offset-4 decoration-gray-400 hover:underline">Bookings</Link></li>
-            <li><Link to="/login" className="cursor-pointer transition decoration-2 underline-offset-4 decoration-gray-400 hover:underline">Login</Link></li>
+            <li>
+              {isAuthenticated ? (
+                <Link to="/upload" className="cursor-pointer transition decoration-2 underline-offset-4 decoration-gray-400 hover:underline">Upload</Link>
+              ) : (
+                <Link to="/login" className="cursor-pointer transition decoration-2 underline-offset-4 decoration-gray-400 hover:underline">Login</Link>
+              )}
+            </li>
             <li><Link to="/contact" className="cursor-pointer transition decoration-2 underline-offset-4 decoration-gray-400 hover:underline">Contact</Link></li>
           </ul>
         </div>
@@ -78,7 +85,13 @@ export default function Navbar({ mode = "light" }) {
             <li><span onClick={() => handleNavigation("/about", "light")} className="cursor-pointer decoration-2 underline-offset-4 decoration-gray-400 hover:underline hover:text-gray-700 transition">About Me</span></li>
             <li><span onClick={() => handleNavigation("/photography", "light")} className="cursor-pointer decoration-2 underline-offset-4 decoration-gray-400 hover:underline hover:text-gray-700 transition">Photography</span></li>            
             <li><span onClick={() => handleNavigation("/booking", "light")} className="cursor-pointer decoration-2 underline-offset-4 decoration-gray-400 hover:underline hover:text-gray-700 transition">Bookings</span></li>
-            <li><span onClick={() => handleNavigation("/login", "light")} className="cursor-pointer decoration-2 underline-offset-4 decoration-gray-400 hover:underline hover:text-gray-700 transition">Login</span></li>
+            <li>
+              {isAuthenticated ? (
+                <span onClick={() => handleNavigation("/upload", "light")} className="cursor-pointer decoration-2 underline-offset-4 decoration-gray-400 hover:underline hover:text-gray-700 transition">Upload</span>
+              ) : (
+                <span onClick={() => handleNavigation("/login", "light")} className="cursor-pointer decoration-2 underline-offset-4 decoration-gray-400 hover:underline hover:text-gray-700 transition">Login</span>
+              )}
+            </li>
             <li><span onClick={() => handleNavigation("/contact", "light")} className="cursor-pointer decoration-2 underline-offset-4 decoration-gray-400 hover:underline hover:text-gray-700 transition">Contact</span></li>
           </ul>
         </div>
