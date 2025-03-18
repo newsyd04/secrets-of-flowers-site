@@ -54,7 +54,7 @@ export default function ArtworkPage() {
 
   return (
     <div className="min-h-screen bg-[#4986a0] py-32 text-gray-900 flex items-center justify-center px-6 lg:px-12">
-      <div className="max-w-5xl w-full bg-white p-10 rounded-2xl shadow-xl border border-gray-100 flex flex-col md:flex-row gap-10 transition-transform duration-300 hover:scale-[1.01]">
+      <div className="max-w-5xl w-full bg-white p-10 rounded-2xl shadow-xl border border-gray-100 flex flex-col md:flex-row gap-10 transition-transform duration-300">
         {/* Image Section */}
         <div className="md:w-1/2 flex justify-center">
           <img

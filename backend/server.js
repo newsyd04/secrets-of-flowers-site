@@ -183,7 +183,11 @@ app.post("/upload", verifyToken, upload.single("image"), async (req, res) => {
 // **Fetch Images by Collection**
 app.get("/images/collection/:collection", async (req, res) => {
   try {
-    const images = await Image.find({ collection: req.params.collection });
+    const collectionParam = req.params.collection;
+    // Use a case-insensitive regular expression to match the collection name exactly.
+    const images = await Image.find({
+      collection: { $regex: new RegExp("^" + collectionParam + "$", "i") }
+    });
     res.json(images);
   } catch (error) {
     res.status(500).json({
