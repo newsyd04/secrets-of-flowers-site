@@ -39,6 +39,7 @@ const ImageSchema = new mongoose.Schema({
   price: Number,
   imageUrl: String,
   paypalOrderId: String,
+  collection: { type: String, enum: ["The Joy", "Hope", "Sage", "Heart and Soul", "The Irish Boreen"], required: true },
 });
 const Image = mongoose.model("Image", ImageSchema);
 
@@ -132,19 +133,36 @@ app.post("/login", async (req, res) => {
 // **Protect Upload Route**
 app.post("/upload", verifyToken, upload.single("image"), async (req, res) => {
   try {
-    const { title, price } = req.body;
+    const { title, price, collection, sizes, framingAvailable } = req.body;
     const file = req.file;
     if (!file) return res.status(400).json({ message: "No file uploaded" });
 
     const result = await cloudinary.v2.uploader.upload(file.path);
-    const newImage = new Image({ title, price, imageUrl: result.secure_url });
+    const newImage = new Image({ 
+      title, 
+      price, 
+      collection, 
+      sizes: JSON.parse(sizes), // Expecting JSON object
+      framingAvailable: framingAvailable === "true",
+      imageUrl: result.secure_url 
+    });
+
     await newImage.save();
     fs.unlinkSync(file.path);
-
     res.status(200).json(newImage);
   } catch (error) {
     console.error("Upload error:", error);
     res.status(500).json({ message: "Error uploading image", error: error.message });
+  }
+});
+
+// **Fetch Images by Collection**
+app.get("/images/collection/:collection", async (req, res) => {
+  try {
+    const images = await Image.find({ collection: req.params.collection });
+    res.json(images);
+  } catch (error) {
+    res.status(500).json({ message: "Error fetching collection images", error: error.message });
   }
 });
 
@@ -158,24 +176,16 @@ const paypalClient = new paypal.core.PayPalHttpClient(environment);
 // **Create PayPal Order**
 app.post("/create-paypal-order", async (req, res) => {
   try {
-    const { title, price } = req.body;
+    const { title, price, size, framing } = req.body;
+    const totalPrice = framing ? price + 20 : price; // Add €20 for framing
 
     const request = new paypal.orders.OrdersCreateRequest();
     request.requestBody({
       intent: "CAPTURE",
       purchase_units: [
         {
-          amount: { currency_code: "EUR", value: price },
-          description: title,
-          custom_id: `artwork-${Date.now()}`,
-          invoice_id: `INV-${Date.now()}`,
-          items: [
-            {
-              name: title,
-              unit_amount: { currency_code: "EUR", value: price },
-              quantity: 1,
-            },
-          ],
+          amount: { currency_code: "EUR", value: totalPrice },
+          description: `${title} (${size}) ${framing ? "Framed" : "Unframed"}`,
         },
       ],
     });
@@ -187,6 +197,7 @@ app.post("/create-paypal-order", async (req, res) => {
     res.status(500).send("Error creating PayPal order");
   }
 });
+
 
 // **Fetch All Images**
 app.get("/images", async (req, res) => {

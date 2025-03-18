@@ -3,6 +3,7 @@ import HomePage from "./pages/HomePage.jsx";
 import Navbar from "./components/NavBar.jsx";
 import Footer from "./components/Footer.jsx";
 import PhotographyPage from "./pages/PhotographyPage.jsx";
+import CollectionPage from "./pages/CollectionPage.jsx";
 import AboutPage from "./pages/AboutPage.jsx";
 import ContactPage from "./pages/ContactPage.jsx";
 import UploadPage from "./pages/UploadPage.jsx";
@@ -17,7 +18,8 @@ export default function App() {
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/about" element={<AboutPage />} />
-        <Route path="/photography" element={<PhotographyPage />}/>
+        <Route path="/photography" element={<PhotographyPage />} />
+        <Route path="/photography/:collection" element={<CollectionPage />} />
         <Route path="/contact" element={<ContactPage />} />
         <Route path="/upload" element={<UploadPage />} />
         <Route path="/artwork/:id" element={<ArtworkPage />} />

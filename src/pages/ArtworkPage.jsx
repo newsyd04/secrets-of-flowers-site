@@ -8,6 +8,9 @@ export default function ArtworkPage() {
   const { id } = useParams();
   const [artwork, setArtwork] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [size, setSize] = useState("Small"); // Default to Small
+  const [frame, setFrame] = useState("Unframed"); // Default to Unframed
+  const [finalPrice, setFinalPrice] = useState(0);
 
   useEffect(() => {
     axios
@@ -15,6 +18,7 @@ export default function ArtworkPage() {
       .then((res) => {
         setArtwork(res.data);
         setLoading(false);
+        setFinalPrice(res.data.price); // Base price
       })
       .catch((err) => {
         console.error("Error fetching artwork:", err);
@@ -25,6 +29,17 @@ export default function ArtworkPage() {
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
+
+  // Price Calculation
+  useEffect(() => {
+    if (artwork) {
+      let price = artwork.price;
+      if (size === "Medium") price += 10;
+      if (size === "Large") price += 20;
+      if (frame !== "Unframed") price += 30; // Frame cost
+      setFinalPrice(price);
+    }
+  }, [size, frame, artwork]);
 
   if (loading)
     return (
@@ -56,7 +71,40 @@ export default function ArtworkPage() {
           <h1 className="text-4xl font-semibold text-gray-900 tracking-tight">
             {artwork.title}
           </h1>
-          <p className="text-2xl font-medium text-gray-700">€{artwork.price}</p>
+
+          {/* Size Selection */}
+          <div>
+            <label className="block font-medium text-gray-700">Size</label>
+            <select
+              className="w-full p-3 mt-2 border border-gray-300 rounded-lg"
+              value={size}
+              onChange={(e) => setSize(e.target.value)}
+            >
+              <option value="Small">Small (Standard)</option>
+              <option value="Medium">Medium (+€10)</option>
+              <option value="Large">Large (+€20)</option>
+            </select>
+          </div>
+
+          {/* Framing Selection */}
+          <div>
+            <label className="block font-medium text-gray-700">Framing</label>
+            <select
+              className="w-full p-3 mt-2 border border-gray-300 rounded-lg"
+              value={frame}
+              onChange={(e) => setFrame(e.target.value)}
+            >
+              <option value="Unframed">Unframed (Free Shipping)</option>
+              <option value="Black Frame">Black Frame (+€30)</option>
+              <option value="White Frame">White Frame (+€30)</option>
+              <option value="Wood Frame">Wood Frame (+€30)</option>
+            </select>
+          </div>
+
+          {/* Final Price */}
+          <p className="text-2xl font-medium text-gray-700">
+            Total: €{finalPrice}
+          </p>
           <p className="text-gray-600 leading-relaxed text-md">
             Own a piece of artistic elegance. Secure this exclusive artwork today.
           </p>
@@ -81,18 +129,19 @@ export default function ArtworkPage() {
                     "https://secrets-of-flowers-site.onrender.com/create-paypal-order",
                     {
                       title: artwork.title,
-                      price: artwork.price,
+                      price: finalPrice,
+                      size,
+                      frame,
                     }
                   );
                   return response.data.id;
                 }}
                 onApprove={async (data, actions) => {
-                    const details = await actions.order.capture();
-                    alert(`Transaction completed by ${details.payer.name.given_name}`);
-                  
-                    console.log("Transaction Details:", details);
-                    console.log("Buyer Email:", details.payer.email_address); // ✅ Save this if needed
-                  }}                  
+                  const details = await actions.order.capture();
+                  alert(`Transaction completed by ${details.payer.name.given_name}`);
+                  console.log("Transaction Details:", details);
+                  console.log("Buyer Email:", details.payer.email_address);
+                }}
               />
             </PayPalScriptProvider>
           </div>
