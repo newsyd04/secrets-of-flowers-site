@@ -15,10 +15,11 @@ const app = express();
 app.use(express.json());
 
 app.use(cors({
-    origin: ["https://newsyd04.github.io", " https://secrets-of-flowers-site.onrender.com/"], // Add allowed origins
-    methods: ["GET", "POST", "PUT", "DELETE"],
-    allowedHeaders: ["Content-Type", "Authorization"]
-  }));
+  origin: ["https://newsyd04.github.io", "https://secrets-of-flowers-site.onrender.com"], // ✅ Allow GitHub Pages & Render
+  methods: ["GET", "POST", "PUT", "DELETE"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+  credentials: true, // ✅ Important for sending cookies or tokens
+}));
 
 // Configure Cloudinary
 cloudinary.v2.config({
