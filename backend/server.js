@@ -19,8 +19,8 @@ app.use(
     origin: [
       "https://newsyd04.github.io",
       "https://secrets-of-flowers-site.onrender.com",
-      "https://secrets-of-flowers-site.onrender.com/images",
-      "https://secrets-of-flowers-site.onrender.com/upload",
+      "http://127.0.0.1:5173",
+      "http://localhost:5173",
     ],
     methods: ["GET", "POST", "PUT", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization"],
