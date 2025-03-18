@@ -7,23 +7,17 @@ import { PayPalButtons, PayPalScriptProvider } from "@paypal/react-paypal-js";
 export default function ArtworkPage() {
   const { id } = useParams();
   const [artwork, setArtwork] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [size, setSize] = useState("Small"); // Default to Small
-  const [frame, setFrame] = useState("Unframed"); // Default to Unframed
-  const [finalPrice, setFinalPrice] = useState(0);
+  const [size, setSize] = useState("Small");
+  const [frame, setFrame] = useState("Unframed");
+  const [price, setPrice] = useState(0);
 
   useEffect(() => {
-    axios
-      .get(`https://secrets-of-flowers-site.onrender.com/images/${id}`)
+    axios.get(`https://secrets-of-flowers-site.onrender.com/images/${id}`)
       .then((res) => {
         setArtwork(res.data);
-        setLoading(false);
-        setFinalPrice(res.data.price); // Base price
+        setPrice(res.data.price);
       })
-      .catch((err) => {
-        console.error("Error fetching artwork:", err);
-        setLoading(false);
-      });
+      .catch((err) => console.error("Error fetching artwork:", err));
   }, [id]);
 
   useEffect(() => {
@@ -32,13 +26,11 @@ export default function ArtworkPage() {
 
   // Price Calculation
   useEffect(() => {
-    if (artwork) {
-      let price = artwork.price;
-      if (size === "Medium") price += 10;
-      if (size === "Large") price += 20;
-      if (frame !== "Unframed") price += 30; // Frame cost
-      setFinalPrice(price);
-    }
+    let newPrice = artwork?.price || 0;
+    if (size === "Medium") newPrice += 10;
+    if (size === "Large") newPrice += 20;
+    if (frame !== "Unframed") newPrice += 30;
+    setPrice(newPrice);
   }, [size, frame, artwork]);
 
   if (loading)

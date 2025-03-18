@@ -15,7 +15,7 @@ const app = express();
 app.use(express.json());
 
 app.use(cors({
-    origin: ["https://newsyd04.github.io", "https://your-frontend.com"], // Add allowed origins
+    origin: ["https://newsyd04.github.io", " https://secrets-of-flowers-site.onrender.com/"], // Add allowed origins
     methods: ["GET", "POST", "PUT", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization"]
   }));
