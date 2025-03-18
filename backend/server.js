@@ -15,7 +15,7 @@ const app = express();
 app.use(express.json());
 
 app.use(cors({
-  origin: ["https://newsyd04.github.io", "https://secrets-of-flowers-site.onrender.com", "https://secrets-of-flowers-site.onrender.com/images"], // ✅ Allow GitHub Pages & Render
+  origin: ["https://newsyd04.github.io", "https://secrets-of-flowers-site.onrender.com", "https://secrets-of-flowers-site.onrender.com/images", "https://secrets-of-flowers-site.onrender.com/upload"], // ✅ Allow GitHub Pages & Render
   methods: ["GET", "POST", "PUT", "DELETE"],
   allowedHeaders: ["Content-Type", "Authorization"],
   credentials: true, // ✅ Important for sending cookies or tokens
