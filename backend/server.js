@@ -14,12 +14,19 @@ dotenv.config();
 const app = express();
 app.use(express.json());
 
-app.use(cors({
-  origin: ["https://newsyd04.github.io", "https://secrets-of-flowers-site.onrender.com", "https://secrets-of-flowers-site.onrender.com/images", "https://secrets-of-flowers-site.onrender.com/upload"], // ✅ Allow GitHub Pages & Render
-  methods: ["GET", "POST", "PUT", "DELETE"],
-  allowedHeaders: ["Content-Type", "Authorization"],
-  credentials: true, // ✅ Important for sending cookies or tokens
-}));
+app.use(
+  cors({
+    origin: [
+      "https://newsyd04.github.io",
+      "https://secrets-of-flowers-site.onrender.com",
+      "https://secrets-of-flowers-site.onrender.com/images",
+      "https://secrets-of-flowers-site.onrender.com/upload",
+    ],
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+    credentials: true,
+  })
+);
 
 // Configure Cloudinary
 cloudinary.v2.config({
@@ -34,13 +41,19 @@ mongoose
   .then(() => console.log("✅ MongoDB connected"))
   .catch((err) => console.error("❌ MongoDB connection error:", err));
 
-// Define Image Schema
+// Define Image Schema with additional fields
 const ImageSchema = new mongoose.Schema({
   title: String,
   price: Number,
   imageUrl: String,
   paypalOrderId: String,
-  collection: { type: String, enum: ["The Joy", "Hope", "Sage", "Heart and Soul", "The Irish Boreen"], required: true },
+  collection: {
+    type: String,
+    enum: ["The Joy", "Hope", "Sage", "Heart and Soul", "The Irish Boreen"],
+    required: true,
+  },
+  sizes: { type: Object }, // Add this field if you plan to store sizes
+  framingAvailable: { type: Boolean }, // Field to indicate framing availability
 });
 const Image = mongoose.model("Image", ImageSchema);
 
@@ -53,11 +66,11 @@ const User = mongoose.model("User", UserSchema);
 
 // Define Booking Schema
 const BookingSchema = new mongoose.Schema({
-    date: String,
-    time: String,
-    email: String,
-  });
-  const Booking = mongoose.model("Booking", BookingSchema);
+  date: String,
+  time: String,
+  email: String,
+});
+const Booking = mongoose.model("Booking", BookingSchema);
 
 // Middleware to Protect Routes
 const verifyToken = (req, res, next) => {
@@ -73,7 +86,7 @@ const verifyToken = (req, res, next) => {
   }
 };
 
-// ✅ **Fix: Move `multer` Configuration Up**
+// Multer Configuration
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     cb(null, "uploads/");
@@ -94,58 +107,66 @@ app.post("/signup", async (req, res) => {
     await newUser.save();
     res.status(201).json({ message: "User created successfully" });
   } catch (error) {
-    res.status(500).json({ message: "Error creating user", error: error.message });
+    res
+      .status(500)
+      .json({ message: "Error creating user", error: error.message });
   }
 });
 
 // **Login Route**
 app.post("/login", async (req, res) => {
-    try {
-      const { username, password } = req.body;
-  
-      if (!username || !password) {
-        console.log("❌ Missing username or password");
-        return res.status(400).json({ message: "Username and password are required" });
-      }
-  
-      const user = await User.findOne({ username });
-      if (!user) {
-        console.log("❌ User not found:", username);
-        return res.status(400).json({ message: "User not found" });
-      }
-  
-      const validPassword = await bcrypt.compare(password, user.password);
-      if (!validPassword) {
-        console.log("❌ Invalid password for user:", username);
-        return res.status(400).json({ message: "Invalid credentials" });
-      }
-  
-      const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: "1h" });
-  
-      console.log("✅ Login successful for user:", username);
-      res.json({ token });
-  
-    } catch (error) {
-      console.error("❌ Login error:", error);
-      res.status(500).json({ message: "Error logging in", error: error.message });
+  try {
+    const { username, password } = req.body;
+
+    if (!username || !password) {
+      console.log("❌ Missing username or password");
+      return res
+        .status(400)
+        .json({ message: "Username and password are required" });
     }
-  });  
+
+    const user = await User.findOne({ username });
+    if (!user) {
+      console.log("❌ User not found:", username);
+      return res.status(400).json({ message: "User not found" });
+    }
+
+    const validPassword = await bcrypt.compare(password, user.password);
+    if (!validPassword) {
+      console.log("❌ Invalid password for user:", username);
+      return res.status(400).json({ message: "Invalid credentials" });
+    }
+
+    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
+      expiresIn: "1h",
+    });
+
+    console.log("✅ Login successful for user:", username);
+    res.json({ token });
+  } catch (error) {
+    console.error("❌ Login error:", error);
+    res
+      .status(500)
+      .json({ message: "Error logging in", error: error.message });
+  }
+});
 
 // **Protect Upload Route**
 app.post("/upload", verifyToken, upload.single("image"), async (req, res) => {
   try {
     const { title, price, collection, sizes, framingAvailable } = req.body;
     const file = req.file;
-    if (!file) return res.status(400).json({ message: "No file uploaded" });
+    if (!file)
+      return res.status(400).json({ message: "No file uploaded" });
 
     const result = await cloudinary.v2.uploader.upload(file.path);
-    const newImage = new Image({ 
-      title, 
-      price, 
-      collection, 
-      sizes: JSON.parse(sizes), // Expecting JSON object
+    const newImage = new Image({
+      title,
+      price,
+      collection,
+      sizes: sizes ? JSON.parse(sizes) : undefined, // Expecting JSON object if provided
       framingAvailable: framingAvailable === "true",
-      imageUrl: result.secure_url 
+      imageUrl: result.secure_url,
     });
 
     await newImage.save();
@@ -153,7 +174,9 @@ app.post("/upload", verifyToken, upload.single("image"), async (req, res) => {
     res.status(200).json(newImage);
   } catch (error) {
     console.error("Upload error:", error);
-    res.status(500).json({ message: "Error uploading image", error: error.message });
+    res
+      .status(500)
+      .json({ message: "Error uploading image", error: error.message });
   }
 });
 
@@ -163,7 +186,10 @@ app.get("/images/collection/:collection", async (req, res) => {
     const images = await Image.find({ collection: req.params.collection });
     res.json(images);
   } catch (error) {
-    res.status(500).json({ message: "Error fetching collection images", error: error.message });
+    res.status(500).json({
+      message: "Error fetching collection images",
+      error: error.message,
+    });
   }
 });
 
@@ -199,7 +225,6 @@ app.post("/create-paypal-order", async (req, res) => {
   }
 });
 
-
 // **Fetch All Images**
 app.get("/images", async (req, res) => {
   const images = await Image.find();
@@ -210,43 +235,47 @@ app.get("/images", async (req, res) => {
 app.get("/images/:id", async (req, res) => {
   try {
     const artwork = await Image.findById(req.params.id);
-    if (!artwork) return res.status(404).json({ message: "Artwork not found" });
+    if (!artwork)
+      return res.status(404).json({ message: "Artwork not found" });
     res.json(artwork);
   } catch (error) {
-    res.status(500).json({ message: "Error fetching artwork", error: error.message });
+    res
+      .status(500)
+      .json({ message: "Error fetching artwork", error: error.message });
   }
 });
 
 // Booking Route
 app.post("/book", async (req, res) => {
-    const { date, time, email } = req.body;
-  
-    // Save Booking in MongoDB
-    const newBooking = new Booking({ date, time, email });
-    await newBooking.save();
-  
-    // Send Notification to Website Owner
-    const transporter = nodemailer.createTransport({
-      service: "gmail",
-      auth: { user: process.env.EMAIL, pass: process.env.EMAIL_PASS },
-    });
-  
-    const mailOptions = {
-      from: process.env.EMAIL,
-      to: "newsyd04@gmail.com",
-      subject: "New Booking Received",
-      text: `New Booking on ${date} at ${time} by ${email}`,
-    };
-  
-    transporter.sendMail(mailOptions, (err, info) => {
-      if (err) {
-        console.error("Email Error:", err);
-        return res.status(500).json({ message: "Error sending email" });
-      }
-      res.json({ message: "Booking confirmed! Email sent to the owner." });
+  const { date, time, email } = req.body;
+  const newBooking = new Booking({ date, time, email });
+  await newBooking.save();
+
+  const transporter = nodemailer.createTransport({
+    service: "gmail",
+    auth: { user: process.env.EMAIL, pass: process.env.EMAIL_PASS },
+  });
+
+  const mailOptions = {
+    from: process.env.EMAIL,
+    to: "newsyd04@gmail.com",
+    subject: "New Booking Received",
+    text: `New Booking on ${date} at ${time} by ${email}`,
+  };
+
+  transporter.sendMail(mailOptions, (err, info) => {
+    if (err) {
+      console.error("Email Error:", err);
+      return res.status(500).json({ message: "Error sending email" });
+    }
+    res.json({
+      message: "Booking confirmed! Email sent to the owner.",
     });
   });
+});
 
 // **Start Server**
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`✅ Server running on port ${PORT}`));
+app.listen(PORT, () =>
+  console.log(`✅ Server running on port ${PORT}`)
+);

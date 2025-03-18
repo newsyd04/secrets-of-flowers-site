@@ -10,7 +10,12 @@ export default function CollectionPage() {
 
   useEffect(() => {
     axios
-      .get(`https://secrets-of-flowers-site.onrender.com/collections/${collectionName.replace(/-/g, " ")}`)
+      .get(
+        `https://secrets-of-flowers-site.onrender.com/images/collection/${collectionName.replace(
+          /-/g,
+          " "
+        )}`
+      )
       .then((res) => setArtworks(res.data))
       .catch((err) => console.error("Error fetching collection:", err));
   }, [collectionName]);
@@ -22,10 +27,13 @@ export default function CollectionPage() {
   return (
     <div className="min-h-screen py-48 font-quicksand bg-[#abbd9a]">
       <div className="max-w-6xl mx-auto px-6 lg:px-8 text-center">
-        <h1 className="text-5xl text-white font-bold">{collectionName.replace(/-/g, " ")}</h1>
+        <h1 className="text-5xl text-white font-bold">
+          {collectionName.replace(/-/g, " ")}
+        </h1>
         <hr className="w-32 mt-6 mx-auto mb-8 border-t-4 border-gray-400 opacity-75" />
         <p className="text-lg text-white max-w-3xl mx-auto leading-relaxed mt-4">
-          Browse exclusive pieces from the {collectionName.replace(/-/g, " ")} collection.
+          Browse exclusive pieces from the {collectionName.replace(/-/g, " ")}{" "}
+          collection.
         </p>
       </div>
 
@@ -38,7 +46,11 @@ export default function CollectionPage() {
               className="relative cursor-pointer bg-white p-4 rounded-xl shadow-md hover:shadow-lg transition"
               onClick={() => navigate(`/artwork/${art._id}`)}
             >
-              <img src={art.imageUrl} alt={art.title} className="w-full h-auto object-contain rounded-lg" />
+              <img
+                src={art.imageUrl}
+                alt={art.title}
+                className="w-full h-auto object-contain rounded-lg"
+              />
               <h2 className="text-xl font-bold mt-2 text-center">{art.title}</h2>
               <p className="text-center text-gray-700">€{art.price}</p>
             </div>

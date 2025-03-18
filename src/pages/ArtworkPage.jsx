@@ -10,14 +10,20 @@ export default function ArtworkPage() {
   const [size, setSize] = useState("Small");
   const [frame, setFrame] = useState("Unframed");
   const [price, setPrice] = useState(0);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    axios.get(`https://secrets-of-flowers-site.onrender.com/images/${id}`)
+    axios
+      .get(`https://secrets-of-flowers-site.onrender.com/images/${id}`)
       .then((res) => {
         setArtwork(res.data);
         setPrice(res.data.price);
+        setLoading(false);
       })
-      .catch((err) => console.error("Error fetching artwork:", err));
+      .catch((err) => {
+        console.error("Error fetching artwork:", err);
+        setLoading(false);
+      });
   }, [id]);
 
   useEffect(() => {
@@ -95,7 +101,7 @@ export default function ArtworkPage() {
 
           {/* Final Price */}
           <p className="text-2xl font-medium text-gray-700">
-            Total: €{finalPrice}
+            Total: €{price}
           </p>
           <p className="text-gray-600 leading-relaxed text-md">
             Own a piece of artistic elegance. Secure this exclusive artwork today.
@@ -105,7 +111,8 @@ export default function ArtworkPage() {
           <div className="mt-6">
             <PayPalScriptProvider
               options={{
-                "client-id": "AWJq9D-sX8yvXcJO3DM39E-N8UcKVQ_D3XPuqDllvg0gsEJNK_kjOcdf74gpSAvrG3sp0Wcbja8ERmrv",
+                "client-id":
+                  "AWJq9D-sX8yvXcJO3DM39E-N8UcKVQ_D3XPuqDllvg0gsEJNK_kjOcdf74gpSAvrG3sp0Wcbja8ERmrv",
                 currency: "EUR",
               }}
             >
@@ -121,7 +128,7 @@ export default function ArtworkPage() {
                     "https://secrets-of-flowers-site.onrender.com/create-paypal-order",
                     {
                       title: artwork.title,
-                      price: finalPrice,
+                      price: price,
                       size,
                       frame,
                     }
