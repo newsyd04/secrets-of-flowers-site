@@ -8,17 +8,33 @@ export default function CollectionPage() {
   const [artworks, setArtworks] = useState([]);
   const navigate = useNavigate();
 
+    // Convert the URL parameter (which might be "hope" or "the-joy") to a raw name.
+  // For lookup, we use lowercase.
+  const rawName = collectionName.replace(/-/g, " "); // e.g. "the joy"
+  const lowerCaseName = rawName.toLowerCase();
+  // For display, capitalize each word.
+  const displayName = lowerCaseName
+    .split(" ")
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
+
+  // Store descriptions with lowercase keys.
+  const collectionDescriptions = {
+    "the joy": "A collection celebrating pure happiness and vibrant energy.",
+    "hope": "The Secrets of Flowers Hope Collection serves as a beautiful reminder of our inner strength and the belief that brighter days are ahead. The cheerful whites and yellows of daisies, wild roses, and old-fashioned lupins always lift my mood, sparking a smile that says, &quot;I’ve got this!&quot; I truly hope they bring the same uplifting energy to you!",
+    "sage": "Artworks that embody wisdom and the calming essence of nature.",
+    "heart and soul": "Pieces that capture deep emotions and the spirit of life.",
+    "the irish boreen": "A tribute to rustic beauty and timeless landscapes.",
+  };
+
+  const description = collectionDescriptions[lowerCaseName] || "";
+
   useEffect(() => {
     axios
-      .get(
-        `https://secrets-of-flowers-site.onrender.com/images/collection/${collectionName.replace(
-          /-/g,
-          " "
-        )}`
-      )
+      .get(`https://secrets-of-flowers-site.onrender.com/images/collection/${rawName}`)
       .then((res) => setArtworks(res.data))
       .catch((err) => console.error("Error fetching collection:", err));
-  }, [collectionName]);
+  }, [rawName]);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -27,13 +43,10 @@ export default function CollectionPage() {
   return (
     <div className="min-h-screen py-48 font-quicksand bg-[#abbd9a]">
       <div className="max-w-6xl mx-auto px-6 lg:px-8 text-center">
-        <h1 className="text-5xl text-white font-bold">
-          {collectionName.replace(/-/g, " ")}
-        </h1>
+        <h1 className="text-5xl text-white font-bold">{displayName}</h1>
         <hr className="w-32 mt-6 mx-auto mb-8 border-t-4 border-gray-400 opacity-75" />
-        <p className="text-lg text-white max-w-3xl mx-auto leading-relaxed mt-4">
-          Browse exclusive pieces from the {collectionName.replace(/-/g, " ")}{" "}
-          collection.
+        <p className="mt-4 text-lg text-white max-w-3xl mx-auto leading-relaxed">
+          {description}
         </p>
       </div>
 
