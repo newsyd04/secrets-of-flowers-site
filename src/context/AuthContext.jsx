@@ -1,4 +1,4 @@
-import { createContext, useState, useEffect, useContext } from "react";
+import { createContext, useState, useEffect } from "react";
 import axios from "axios";
 
 export const AuthContext = createContext();
@@ -16,7 +16,8 @@ export function AuthProvider({ children }) {
 
   const login = async (username, password) => {
     try {
-      const res = await axios.post("https://secrets-of-flowers-site.onrender.com/login", { username, password });
+      // Updated login endpoint:
+      const res = await axios.post("https://webdev-backends.onrender.com/flowers/login", { username, password });
       localStorage.setItem("token", res.data.token);
       axios.defaults.headers.common["Authorization"] = res.data.token;
       setUser({ token: res.data.token });

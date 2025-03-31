@@ -26,11 +26,13 @@ export default function UploadPage() {
     }
   };
 
+  // Use environment variable or fallback to the deployed master server URL with /flowers prefix
+  const baseUrl = "https://webdev-backends.onrender.com";
+  const flowersUrl = `${baseUrl}/flowers`;
+
   const fetchImages = async () => {
     try {
-      const res = await axios.get(
-        "https://secrets-of-flowers-site.onrender.com/images"
-      );
+      const res = await axios.get(`${flowersUrl}/images`);
       setImages(res.data);
     } catch (error) {
       console.error("Error fetching images:", error);
@@ -50,13 +52,9 @@ export default function UploadPage() {
 
     try {
       const token = localStorage.getItem("token");
-      const res = await axios.post(
-        "https://secrets-of-flowers-site.onrender.com/upload",
-        formData,
-        {
-          headers: { Authorization: token },
-        }
-      );
+      const res = await axios.post(`${flowersUrl}/upload`, formData, {
+        headers: { Authorization: token },
+      });
       setImages([...images, res.data]);
       setTitle("");
       setPrice("");
@@ -71,10 +69,7 @@ export default function UploadPage() {
     isAuthenticated && (
       <div className="min-h-screen font-quicksand bg-[#e0cca4] text-gray-900 pt-32 pb-16">
         <div className="container mx-auto px-6 lg:px-32">
-          <h1 className="text-4xl text-center text-[#544265] mb-8">
-            Upload New Listing
-          </h1>
-
+          <h1 className="text-4xl text-center text-[#544265] mb-8">Upload New Listing</h1>
           {/* Upload Form */}
           <div className="max-w-lg mx-auto bg-white p-8 rounded-lg shadow-lg border border-[#544265]">
             <form onSubmit={handleUpload} className="space-y-4">
@@ -101,13 +96,11 @@ export default function UploadPage() {
                 required
               >
                 <option value="">Select Collection</option>
-                {["The Joy", "Hope", "Sage", "Heart and Soul", "The Irish Boreen"].map(
-                  (col) => (
-                    <option key={col} value={col}>
-                      {col}
-                    </option>
-                  )
-                )}
+                {["The Joy", "Hope", "Sage", "Heart and Soul", "The Irish Boreen"].map((col) => (
+                  <option key={col} value={col}>
+                    {col}
+                  </option>
+                ))}
               </select>
               <input
                 type="file"
@@ -126,9 +119,7 @@ export default function UploadPage() {
           </div>
 
           {/* Display Images */}
-          <h2 className="text-3xl text-center text-[#544265] mt-12">
-            Available Listings
-          </h2>
+          <h2 className="text-3xl text-center text-[#544265] mt-12">Available Listings</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 mt-8">
             {images.map((img) => (
               <div
@@ -141,9 +132,7 @@ export default function UploadPage() {
                   alt={img.title}
                   className="w-full h-48 object-cover rounded-md"
                 />
-                <h2 className="text-xl font-semibold mt-2 text-center">
-                  {img.title}
-                </h2>
+                <h2 className="text-xl font-semibold mt-2 text-center">{img.title}</h2>
                 <p className="text-gray-700 text-center">€{img.price}</p>
               </div>
             ))}

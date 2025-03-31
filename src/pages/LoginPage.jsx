@@ -52,7 +52,6 @@ export default function LoginPage() {
             Login
           </button>
         </form>
-
       </div>
     </div>
   );

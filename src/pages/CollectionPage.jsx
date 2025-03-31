@@ -8,9 +8,8 @@ export default function CollectionPage() {
   const [artworks, setArtworks] = useState([]);
   const navigate = useNavigate();
 
-    // Convert the URL parameter (which might be "hope" or "the-joy") to a raw name.
-  // For lookup, we use lowercase.
-  const rawName = collectionName.replace(/-/g, " "); // e.g. "the joy"
+  // Convert the URL parameter (e.g., "hope" or "the-joy") to a raw name.
+  const rawName = collectionName.replace(/-/g, " "); // e.g., "the joy"
   const lowerCaseName = rawName.toLowerCase();
   // For display, capitalize each word.
   const displayName = lowerCaseName
@@ -21,7 +20,7 @@ export default function CollectionPage() {
   // Store descriptions with lowercase keys.
   const collectionDescriptions = {
     "the joy": "A collection celebrating pure happiness and vibrant energy.",
-    "hope": "The Secrets of Flowers Hope Collection serves as a beautiful reminder of our inner strength and the belief that brighter days are ahead. The cheerful whites and yellows of daisies, wild roses, and old-fashioned lupins always lift my mood, sparking a smile that says, &quot;I’ve got this!&quot; I truly hope they bring the same uplifting energy to you!",
+    "hope": "The Secrets of Flowers Hope Collection serves as a beautiful reminder of our inner strength and the belief that brighter days are ahead. The cheerful whites and yellows of daisies, wild roses, and old-fashioned lupins always lift my mood, sparking a smile that says, \"I’ve got this!\" I truly hope they bring the same uplifting energy to you!",
     "sage": "Artworks that embody wisdom and the calming essence of nature.",
     "heart and soul": "Pieces that capture deep emotions and the spirit of life.",
     "the irish boreen": "A tribute to rustic beauty and timeless landscapes.",
@@ -31,7 +30,7 @@ export default function CollectionPage() {
 
   useEffect(() => {
     axios
-      .get(`https://secrets-of-flowers-site.onrender.com/images/collection/${rawName}`)
+      .get(`https://webdev-backends.onrender.com/flowers/images/collection/${rawName}`)
       .then((res) => setArtworks(res.data))
       .catch((err) => console.error("Error fetching collection:", err));
   }, [rawName]);

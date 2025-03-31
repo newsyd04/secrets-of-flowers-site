@@ -14,7 +14,7 @@ export default function ArtworkPage() {
 
   useEffect(() => {
     axios
-      .get(`https://secrets-of-flowers-site.onrender.com/images/${id}`)
+      .get(`https://webdev-backends.onrender.com/flowers/images/${id}`)
       .then((res) => {
         setArtwork(res.data);
         setPrice(res.data.price);
@@ -125,7 +125,7 @@ export default function ArtworkPage() {
                 }}
                 createOrder={async () => {
                   const response = await axios.post(
-                    "https://secrets-of-flowers-site.onrender.com/create-paypal-order",
+                    "https://webdev-backends.onrender.com/flowers/create-paypal-order",
                     {
                       title: artwork.title,
                       price: price,
