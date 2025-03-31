@@ -5,6 +5,10 @@ import "@fortawesome/fontawesome-free/css/all.min.css";
 import bg from "../assets/painting-bg.jpg"
 import { Link } from "react-router-dom";
 
+import piece1 from "../assets/piece1.jpg";
+import piece2 from "../assets/piece2.jpg";
+import piece3 from "../assets/piece3.jpg";
+
 export default function HomePage() {
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -54,15 +58,14 @@ export default function HomePage() {
         <hr className="w-32 mx-auto border-t-4 border-gray-400 mb-12" />
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
           {[
-            { title: "Abstract Landscape", img: "https://scontent-dub4-1.xx.fbcdn.net/v/t39.30808-6/356369589_278241328066250_7822698050456095495_n.jpg?_nc_cat=100&ccb=1-7&_nc_sid=833d8c&_nc_ohc=2_wSWUGeNuoQ7kNvgEVRBiR&_nc_oc=AdjCRpwzldmINwqIcU84vDyk3PPIwZVV5wHJ53Hqhj-wSRpPzsHA4CpTptgwH9IV_4o&_nc_zt=23&_nc_ht=scontent-dub4-1.xx&_nc_gid=AlmpOrKspnVRFnoQz_OJhkQ&oh=00_AYBKvv2oLPZRu35sp9uEeuJAC2X_h8tTV-Ts8RCc1pDWaQ&oe=67B90024" },
-            { title: "Surreal Dreams", img: "https://scontent-dub4-1.xx.fbcdn.net/v/t39.30808-6/475372301_628975702992809_8408071231963024023_n.jpg?_nc_cat=104&ccb=1-7&_nc_sid=833d8c&_nc_ohc=hRGMWUNfZ54Q7kNvgEMCLFP&_nc_oc=Adgnqm3lRFUOdv5YdSFucWx82YG2rgrgLFxxa5luQttiD3ppzjkKvusvhkx0lk9AH_g&_nc_zt=23&_nc_ht=scontent-dub4-1.xx&_nc_gid=A-dkM5bhcM66AgWkf0eXj14&oh=00_AYDEHlCGSZXV3niATNq_yWX4yDDWMBYC1cnmB2zNCkHvSA&oe=67B8CFCC" },
-            { title: "Surreal Dreams", img: "https://scontent-dub4-1.xx.fbcdn.net/v/t39.30808-6/352210386_982611372920888_6957061309819647396_n.jpg?_nc_cat=106&ccb=1-7&_nc_sid=833d8c&_nc_ohc=ewazjylHxh4Q7kNvgF_FSUR&_nc_oc=AdhfPnhZ14xj4ob4vP4kZ9i6RJlkmwXJxdbmkfCwCQ_6aLZNj8AcDeJtTq2aH9hTz0Q&_nc_zt=23&_nc_ht=scontent-dub4-1.xx&_nc_gid=AQbit6he0ZOW2aP5SZPZotF&oh=00_AYBURfmjgDDT2Ix-o2WLlYDhl5hSkPW40yOBBHyNXINgyw&oe=67B8F416" },
+            { title: "First Thaw", img: piece1},
+            { title: "Surreal Constructions", img: piece2},
+            { title: "Mini-Magic", img:  piece3},
           ].map((art, index) => (
             <div key={index} className="relative group bg-white rounded-2xl shadow-lg overflow-hidden transform hover:scale-105 transition duration-500">
               <img src={art.img} alt={art.title} className="w-full h-64 object-cover" />
               <div className="absolute inset-0 bg-black bg-opacity-70 flex flex-col justify-center items-center text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                 <h3 className="text-xl font-bold">{art.title}</h3>
-                <p className="text-gray-300 text-sm mt-2">Blending fantasy and reality to spark imagination.</p>
               </div>
             </div>
           ))}

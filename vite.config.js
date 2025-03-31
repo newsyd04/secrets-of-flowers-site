@@ -17,5 +17,5 @@ export default defineConfig({
       },
     },
   },
-  base: isProduction ? "/secrets-of-flowers-site/" : "/", // Use "/" for local dev
+  base: "/",
 });

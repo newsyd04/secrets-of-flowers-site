@@ -2,6 +2,7 @@
 import { useEffect } from "react";
 import React from "react";
 import mairead1 from "../assets/mairead1.jpg";
+import mairead3 from "../assets/mairead3.jpg";
 
 export default function AboutPage() {
   useEffect(() => {
@@ -41,15 +42,11 @@ export default function AboutPage() {
           </div>
           {/* Hover Effect on Image */}
           <div className="relative group">
-            <img
-              src="https://scontent-dub4-1.xx.fbcdn.net/v/t39.30808-6/365791432_301241415766241_2015234440302099624_n.jpg?_nc_cat=111&ccb=1-7&_nc_sid=127cfc&_nc_ohc=04sML05CFBwQ7kNvgGOPOZC&_nc_oc=AdjHHYE9o-lmHhEjH2fuy_uHsqXIhl6qTYzA2lm4Su-moLGm8aUBbuZchCtY_y3mBQg&_nc_zt=23&_nc_ht=scontent-dub4-1.xx&_nc_gid=A2OMLYOMtAX1wyNLYroSvMB&oh=00_AYCk4RxQOgWJMfKtJ0N7cvWFgUlSjaqPqUhNA1mOWELp5A&oe=67B90093"
-              alt="Mairead capturing nature"
-              className="w-full rounded-2xl shadow-lg transition duration-500"
+              <img
+              src={mairead3}
+              alt="Mairead in the field"
+              className="rounded-xl mx-auto shadow-2xl hover:scale-105 transition duration-500"
             />
-            <div className="absolute inset-0 bg-black bg-opacity-70 flex flex-col justify-center items-center text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-2xl">
-              <h2 className="text-2xl font-bold">In the Moment</h2>
-              <p className="mt-2 text-sm text-white-200">Exploring nature through the lens.</p>
-            </div>
           </div>
         </div>
       </div>
