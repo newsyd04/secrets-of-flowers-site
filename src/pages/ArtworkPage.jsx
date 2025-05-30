@@ -26,9 +26,27 @@ export default function ArtworkPage() {
       });
   }, [id]);
 
+  const [frameOptions, setFrameOptions] = useState([]);
+
+  useEffect(() => {
+    axios.get("https://webdev-backends.onrender.com/flowers/frames")
+      .then((res) => {
+        const availableFrames = Object.entries(res.data)
+          .filter(([_, available]) => available)
+          .map(([name]) => name);
+        setFrameOptions(availableFrames);
+      });
+  }, []);
+
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
+
+  const sizeDimensions = {
+  Small: "30x40cm",
+  Medium: "45x60cm",
+  Large: "60x80cm",
+  };
 
   // Price Calculation
   useEffect(() => {
@@ -56,12 +74,15 @@ export default function ArtworkPage() {
     <div className="min-h-screen bg-[#4986a0] py-32 text-gray-900 flex items-center justify-center px-6 lg:px-12">
       <div className="max-w-5xl w-full bg-white p-10 rounded-2xl shadow-xl border border-gray-100 flex flex-col md:flex-row gap-10 transition-transform duration-300">
         {/* Image Section */}
-        <div className="md:w-1/2 flex justify-center">
+        <div className="md:w-1/2 relative flex justify-center">
           <img
             src={artwork.imageUrl}
             alt={artwork.title}
             className="w-full max-h-[500px] object-cover rounded-xl shadow-md transition-transform duration-300 hover:scale-105"
           />
+          <div className="absolute bottom-3 right-3 bg-white/80 text-sm italic text-gray-700 px-3 py-1 rounded-md shadow">
+            {sizeDimensions[size]}
+          </div>
         </div>
 
         {/* Details Section */}
@@ -93,9 +114,9 @@ export default function ArtworkPage() {
               onChange={(e) => setFrame(e.target.value)}
             >
               <option value="Unframed">Unframed (Free Shipping)</option>
-              <option value="Black Frame">Black Frame (+€30)</option>
-              <option value="White Frame">White Frame (+€30)</option>
-              <option value="Wood Frame">Wood Frame (+€30)</option>
+              {frameOptions.map((f) => (
+                <option key={f} value={f}>{f} (+€30)</option>
+              ))}
             </select>
           </div>
 
