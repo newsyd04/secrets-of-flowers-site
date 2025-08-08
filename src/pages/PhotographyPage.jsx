@@ -1,6 +1,6 @@
 "use client";
 import React, { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 
 // Import images as modules
 import dashofpink from "../assets/dashofpink.jpg";
@@ -19,89 +19,101 @@ const staticThumbnails = {
 };
 
 export default function PhotographyPage() {
-  const navigate = useNavigate();
-  const collections = ["The Joy", "Hope", "Sage", "Heart and Soul", "The Irish Boreen"];
-
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
 
-  // Split collections into rows of 3 items each.
-  const rows = [];
-  for (let i = 0; i < collections.length; i += 3) {
-    rows.push(collections.slice(i, i + 3));
-  }
+  const collections = [
+    "The Joy",
+    "Hope",
+    "Sage",
+    "Heart and Soul",
+    "The Irish Boreen",
+  ];
+
+  const toSlug = (name) => name.toLowerCase().replace(/\s+/g, "-");
 
   return (
-    <div className="min-h-screen py-48 font-quicksand bg-[#abbd9a]">
-      {/* Page Header */}
-      <div className="max-w-6xl mx-auto px-6 lg:px-8 text-center">
-        <h1 className="text-5xl text-white font-bold">Photography Collections</h1>
-        <hr className="w-32 mt-6 mx-auto mb-8 border-t-4 border-gray-400 opacity-75" />
-        <p className="text-lg text-white max-w-3xl mx-auto leading-relaxed mt-4">
-          Discover my curated photography collections, each capturing a unique essence of nature.
-        </p>
-      </div>
+    <div className="min-h-screen bg-[#f5f8f5]">
+      {/* Header */}
+      <header className="bg-gradient-to-b from-[#abbd9a] to-[#9fb293]">
+        <div className="max-w-6xl mx-auto px-6 lg:px-8 pt-36 pb-24 text-center">
+          <h1 className="text-4xl md:text-5xl text-white font-bold tracking-tight">
+            Photography Collections
+          </h1>
+          <hr className="w-24 mt-5 mx-auto border-t-4 border-white/50 rounded" />
+          <p className="text-lg text-white/90 max-w-3xl mx-auto leading-relaxed mt-5">
+            Discover my curated photography collections, each capturing a unique
+            essence of nature.
+          </p>
+        </div>
+      </header>
 
-      {/* Collections Rows */}
-      <div className="max-w-7xl mx-auto px-6 lg:px-8 py-12 space-y-8">
-        {rows.map((row, rowIndex) =>
-          row.length === 3 ? (
-            // Full row: use grid with 3 columns
-            <div key={rowIndex} className="grid grid-cols-3 gap-8">
-              {row.map((collection, index) => (
-                <div
-                  key={index}
-                  className="group relative rounded-2xl overflow-hidden shadow-xl cursor-pointer transform transition duration-500 hover:scale-105"
-                  onClick={() =>
-                    navigate(`/photography/${collection.toLowerCase().replace(/\s+/g, "-")}`)
-                  }
-                >
-                  <img
-                    src={staticThumbnails[collection]}
-                    alt={collection}
-                    className="h-64 w-full object-cover"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent opacity-75"></div>
-                  <div className="absolute bottom-4 left-4 right-4 text-center">
-                    <h2 className="text-3xl font-bold text-white">{collection}</h2>
-                    <p className="text-sm text-white mt-1">
-                      Explore the {collection} collection
-                    </p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            // Incomplete row: use flex to center items horizontally
-            <div key={rowIndex} className="flex justify-center gap-8">
-              {row.map((collection, index) => (
-                <div
-                  key={index}
-                  className="group relative rounded-2xl overflow-hidden shadow-xl cursor-pointer transform transition duration-500 hover:scale-105"
-                  style={{ width: "calc((100% - 16px) / 3)" }}  // ensure same width as a grid item
-                  onClick={() =>
-                    navigate(`/photography/${collection.toLowerCase().replace(/\s+/g, "-")}`)
-                  }
-                >
-                  <img
-                    src={staticThumbnails[collection]}
-                    alt={collection}
-                    className="h-64 w-full object-cover"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent opacity-75"></div>
-                  <div className="absolute bottom-4 left-4 right-4 text-center">
-                    <h2 className="text-3xl font-bold text-white">{collection}</h2>
-                    <p className="text-sm text-white mt-1">
-                      Explore the {collection} collection
-                    </p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )
-        )}
-      </div>
+      {/* Grid */}
+      <main className="max-w-7xl mx-auto px-6 lg:px-8 py-12 space-y-8">
+        {/* Top row: 3 */}
+        <div className="grid gap-8 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+          {collections.slice(0, 3).map((collection) => (
+            <Link
+              key={collection}
+              to={`/photography/${toSlug(collection)}`}
+              className="group relative rounded-2xl overflow-hidden shadow-md border border-gray-100 bg-white focus:outline-none focus-visible:ring-2 focus-visible:ring-[#8b9a71] focus-visible:ring-offset-2"
+              aria-label={`Open ${collection} collection`}
+            >
+              <div className="overflow-hidden">
+                <img
+                  src={staticThumbnails[collection]}
+                  alt={collection}
+                  className="w-full h-64 object-cover transition-transform duration-500 group-hover:scale-105"
+                  loading="lazy"
+                />
+              </div>
+              <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+              <div className="absolute bottom-4 left-4 right-4 text-center">
+                <h2 className="text-2xl md:text-3xl font-bold text-white drop-shadow">
+                  {collection}
+                </h2>
+                <p className="text-sm text-white/90 mt-1">
+                  Explore the {collection} collection
+                </p>
+              </div>
+              <span className="absolute inset-x-0 top-0 h-1 bg-[#8b9a71] opacity-0 group-hover:opacity-100 transition" />
+            </Link>
+          ))}
+        </div>
+
+        {/* Bottom row: 2 */}
+        <div className="grid gap-8 grid-cols-1 sm:grid-cols-2 lg:grid-cols-2">
+          {collections.slice(3).map((collection) => (
+            <Link
+              key={collection}
+              to={`/photography/${toSlug(collection)}`}
+              className="group relative rounded-2xl overflow-hidden shadow-md border border-gray-100 bg-white focus:outline-none focus-visible:ring-2 focus-visible:ring-[#8b9a71] focus-visible:ring-offset-2"
+              aria-label={`Open ${collection} collection`}
+            >
+              <div className="overflow-hidden">
+                <img
+                  src={staticThumbnails[collection]}
+                  alt={collection}
+                  className="w-full h-64 object-cover transition-transform duration-500 group-hover:scale-105"
+                  loading="lazy"
+                />
+              </div>
+              <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+              <div className="absolute bottom-4 left-4 right-4 text-center">
+                <h2 className="text-2xl md:text-3xl font-bold text-white drop-shadow">
+                  {collection}
+                </h2>
+                <p className="text-sm text-white/90 mt-1">
+                  Explore the {collection} collection
+                </p>
+              </div>
+              <span className="absolute inset-x-0 top-0 h-1 bg-[#8b9a71] opacity-0 group-hover:opacity-100 transition" />
+            </Link>
+          ))}
+        </div>
+      </main>
+
     </div>
   );
 }
