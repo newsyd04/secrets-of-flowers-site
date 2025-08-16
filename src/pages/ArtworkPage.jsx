@@ -152,7 +152,7 @@ export default function ArtworkPage() {
           <div className="mt-2">
             <PayPalScriptProvider
               options={{
-                "client-id": "LIVE-PAYPAL-CLIENT-ID", // ⬅️ replace with your LIVE client id
+                "client-id": "AdtcN9nf2NX3EQ0rYjsotpfCIfUF1CnyzVTr9B1XDa-nGdB3RZDgIDOJqlQ-pKESRzEWLwrbDXs3WJsH",
                 currency: "EUR",
               }}
             >
