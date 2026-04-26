@@ -347,7 +347,9 @@ export default function ArtworkPage() {
                           res.data?.capture?.payer?.name?.given_name ||
                           res.data?.capture?.payment_source?.paypal?.name?.given_name ||
                           null;
-                        navigate("/order/success", {
+                        // Pass details via state for instant render, AND via
+                        // ?orderId= so a refresh can recover from the backend.
+                        navigate(`/order/success?orderId=${encodeURIComponent(data.orderID)}`, {
                           state: {
                             payerName,
                             artworkTitle: artwork.title,
@@ -360,7 +362,15 @@ export default function ArtworkPage() {
                         });
                       } catch (e) {
                         console.error("Capture failed:", e);
-                        alert("Payment capture failed. Your card has NOT been charged.");
+                        // By the time onApprove fires, PayPal has already
+                        // authorised the user. Whether the capture call
+                        // actually moved money is unknown from the client,
+                        // so we deliberately don't say "you weren't charged."
+                        alert(
+                          "We couldn't confirm your order on our end. " +
+                          "Please don't pay again — email mairead@secretsofflowers.com " +
+                          "with your PayPal order ID and we'll sort it out."
+                        );
                       }
                     }}
                     onError={(err) => {

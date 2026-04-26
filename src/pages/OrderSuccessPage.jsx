@@ -1,20 +1,61 @@
 "use client";
-import React, { useEffect } from "react";
-import { useLocation, Navigate } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { useLocation, useSearchParams, Navigate } from "react-router-dom";
+import axios from "axios";
 import PageHeader from "../components/PageHeader";
 import Section from "../components/Section";
 import Button from "../components/Button";
 import SEO from "../components/SEO";
 
+const API_BASE = "https://webdev-backends.onrender.com/flowers";
+
 export default function OrderSuccessPage() {
   const { state } = useLocation();
+  const [search] = useSearchParams();
+  const [order, setOrder] = useState(state || null);
+  const [loading, setLoading] = useState(false);
+  const [notFound, setNotFound] = useState(false);
 
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
 
-  // No state means user landed here directly — send them home gracefully
-  if (!state || !state.artworkTitle) {
+  // If we don't have order details from route state (e.g. user refreshed),
+  // try to recover from the ?orderId= query param via the backend.
+  useEffect(() => {
+    if (order?.artworkTitle) return; // already have data
+    const orderId = search.get("orderId");
+    if (!orderId) {
+      setNotFound(true);
+      return;
+    }
+    setLoading(true);
+    axios
+      .get(`${API_BASE}/orders/${orderId}`)
+      .then(({ data }) => {
+        setOrder({
+          payerName: data.buyerName || null,
+          artworkTitle: data.artworkTitle,
+          artworkImage: data.artworkImageUrl,
+          size: data.size,
+          frame: data.frame,
+          total: data.total,
+          orderId: data.orderId,
+        });
+      })
+      .catch(() => setNotFound(true))
+      .finally(() => setLoading(false));
+  }, [order, search]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-cream-50 flex items-center justify-center text-lg text-ink-700/70">
+        Loading your order…
+      </div>
+    );
+  }
+
+  if (notFound || !order?.artworkTitle) {
     return <Navigate to="/" replace />;
   }
 
@@ -26,7 +67,7 @@ export default function OrderSuccessPage() {
     frame,
     total,
     orderId,
-  } = state;
+  } = order;
 
   return (
     <div className="min-h-screen">
