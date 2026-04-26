@@ -1,8 +1,57 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-  
-html {
-  @apply overscroll-none;
-  scroll-behavior: smooth;
+
+@layer base {
+  html {
+    @apply overscroll-none;
+    scroll-behavior: smooth;
+  }
+  body {
+    @apply bg-cream-50 text-ink-700 font-quicksand antialiased;
+  }
+  h1,
+  h2,
+  h3,
+  h4 {
+    @apply text-ink-900 tracking-tight;
+  }
+}
+
+@layer components {
+  /* react-calendar — brand-aligned override (used by BookingPage) */
+  .react-calendar {
+    @apply w-full bg-cream-50 border border-sage-200 rounded-xl p-3 font-quicksand;
+  }
+  .react-calendar__navigation button {
+    @apply text-sage-700 font-semibold rounded-md;
+  }
+  .react-calendar__navigation button:enabled:hover,
+  .react-calendar__navigation button:enabled:focus {
+    @apply bg-sage-100;
+  }
+  .react-calendar__month-view__weekdays {
+    @apply text-sage-700 uppercase text-xs;
+  }
+  .react-calendar__month-view__weekdays abbr {
+    text-decoration: none;
+  }
+  .react-calendar__tile {
+    @apply rounded-md text-ink-700;
+  }
+  .react-calendar__tile:enabled:hover,
+  .react-calendar__tile:enabled:focus {
+    @apply bg-sage-100;
+  }
+  .react-calendar__tile--now {
+    @apply bg-cream-100 text-ink-900;
+  }
+  .react-calendar__tile--active,
+  .react-calendar__tile--active:enabled:hover,
+  .react-calendar__tile--active:enabled:focus {
+    @apply bg-sage-500 text-white;
+  }
+  .react-calendar__month-view__days__day--neighboringMonth {
+    @apply text-sage-300;
+  }
 }

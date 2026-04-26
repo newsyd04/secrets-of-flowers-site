@@ -1,78 +1,172 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
 import axios from "axios";
+
+import PageHeader from "../components/PageHeader";
+import Section from "../components/Section";
+import Button from "../components/Button";
+import FadeIn from "../components/FadeIn";
+import SEO from "../components/SEO";
+
+const TIMES = ["10:00 AM", "12:00 PM", "2:00 PM"];
 
 export default function BookingPage() {
   const [date, setDate] = useState(new Date());
   const [time, setTime] = useState("");
   const [email, setEmail] = useState("");
+  const [submitting, setSubmitting] = useState(false);
 
-  const handleBooking = async () => {
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
+  const handleBooking = async (e) => {
+    e.preventDefault();
+    if (!time || !email) return;
+    setSubmitting(true);
     try {
-      const res = await axios.post("https://webdev-backends.onrender.com/flowers/book", { date, time, email });
+      const res = await axios.post(
+        "https://webdev-backends.onrender.com/flowers/book",
+        { date, time, email }
+      );
       alert(res.data.message);
     } catch (error) {
       console.error("Booking error:", error);
+      alert("Couldn't submit your booking — please try again.");
+    } finally {
+      setSubmitting(false);
     }
   };
 
+  const niceDate = date.toLocaleDateString(undefined, {
+    weekday: "long",
+    month: "long",
+    day: "numeric",
+  });
+
   return (
-    <div className="min-h-screen font-quicksand py-32 bg-[#abbd9a] flex items-center justify-center px-6">
-      <div className="max-w-6xl w-full grid grid-cols-1 md:grid-cols-2 gap-12 bg-white shadow-xl rounded-2xl overflow-hidden">
-        
-        {/* Left Section: Booking Info */}
-        <div className="p-12 flex flex-col justify-center">
-          <h2 className="text-4xl font-bold text-[#544265] mb-4">Nature Photography Walks</h2>
-          <p className="text-gray-700 text-lg leading-relaxed">
-            Immerse yourself in the beauty of nature with guided photography walks. 
-            Learn how to capture stunning landscapes, intricate details of flowers, 
-            and the vibrant colors of the wild.
-          </p>
-          <p className="mt-4 text-gray-700 text-lg leading-relaxed">
-            Whether you're a beginner or an experienced photographer, these walks 
-            offer a unique opportunity to develop your skills while embracing the 
-            tranquility of the outdoors.
-          </p>
-          <p className="mt-6 text-xl font-semibold text-[#544265]">
-            📅 Book your slot today!
-          </p>
-        </div>
+    <div className="min-h-screen">
+      <SEO
+        title="Book a Photography Walk"
+        description="Join Mairead for a guided 2-hour nature photography walk in Tralee and Co. Kerry. Beginner to advanced — bring any camera."
+      />
 
-        {/* Right Section: Booking Form */}
-        <div className="p-8 border-l border-gray-200">
-          <h1 className="text-3xl font-bold text-center text-[#544265] mb-6">Book a Slot</h1>
+      <PageHeader
+        eyebrow="Photography walks"
+        title="Book a Slot"
+        description="Immerse yourself in the beauty of nature with guided photography walks. Whether you're a beginner or experienced, we'll spend the time learning to see — and capture — the small details."
+      />
 
-          <Calendar onChange={setDate} value={date} className="w-full mb-4 border rounded-lg shadow-sm" />
+      <Section tone="cream">
+        <FadeIn>
+        <form
+          onSubmit={handleBooking}
+          className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 bg-white rounded-2xl border border-sage-100 overflow-hidden shadow-sm"
+        >
+          {/* Info / context */}
+          <div className="p-8 lg:p-10 bg-sage-50">
+            <p className="text-sage-700 text-xs uppercase tracking-[0.2em] font-semibold">
+              What to expect
+            </p>
+            <h2 className="mt-3 text-2xl md:text-3xl font-semibold text-ink-900">
+              A morning, an afternoon, a slow walk through the wild.
+            </h2>
+            <p className="mt-5 text-ink-700 leading-relaxed">
+              Learn how to capture stunning landscapes, intricate details of
+              flowers, and the vibrant colours of the wild — at your pace, with
+              guidance tailored to where you are with your camera.
+            </p>
 
-          <label className="block font-medium text-gray-700 mt-4">Select Time</label>
-          <select
-            className="w-full p-3 mt-2 border border-gray-300 rounded-lg"
-            onChange={(e) => setTime(e.target.value)}
-          >
-            <option value="">Choose Time</option>
-            <option value="10:00 AM">10:00 AM</option>
-            <option value="12:00 PM">12:00 PM</option>
-            <option value="2:00 PM">2:00 PM</option>
-          </select>
+            <ul className="mt-6 space-y-3 text-ink-700">
+              <li className="flex gap-3">
+                <i className="fa-solid fa-check text-sage-600 mt-1" />
+                <span>2-hour guided session</span>
+              </li>
+              <li className="flex gap-3">
+                <i className="fa-solid fa-check text-sage-600 mt-1" />
+                <span>Beginner to advanced — bring any camera</span>
+              </li>
+              <li className="flex gap-3">
+                <i className="fa-solid fa-check text-sage-600 mt-1" />
+                <span>Tralee &amp; surrounding Co. Kerry locations</span>
+              </li>
+            </ul>
+          </div>
 
-          <label className="block font-medium text-gray-700 mt-4">Your Email</label>
-          <input
-            type="email"
-            className="w-full p-3 mt-2 border border-gray-300 rounded-lg"
-            placeholder="Enter your email"
-            onChange={(e) => setEmail(e.target.value)}
-          />
+          {/* Booking form */}
+          <div className="p-8 lg:p-10 flex flex-col">
+            <div>
+              <label className="block text-sm font-semibold text-sage-700 uppercase tracking-[0.18em] mb-3">
+                Pick a date
+              </label>
+              <Calendar
+                onChange={setDate}
+                value={date}
+                minDate={new Date()}
+              />
+              <p className="mt-3 text-sm text-ink-700/70">
+                Selected: <span className="text-ink-900 font-medium">{niceDate}</span>
+              </p>
+            </div>
 
-          <button
-            className="w-full bg-[#544265] text-white py-3 mt-6 rounded-lg font-semibold hover:bg-[#6a547a] transition"
-            onClick={handleBooking}
-          >
-            Confirm Booking
-          </button>
-        </div>
+            <div className="mt-6">
+              <label className="block text-sm font-semibold text-sage-700 uppercase tracking-[0.18em] mb-3">
+                Choose a time
+              </label>
+              <div className="grid grid-cols-3 gap-2">
+                {TIMES.map((t) => {
+                  const active = time === t;
+                  return (
+                    <button
+                      key={t}
+                      type="button"
+                      onClick={() => setTime(t)}
+                      className={`rounded-xl border px-3 py-2.5 text-sm font-medium transition ${
+                        active
+                          ? "border-sage-500 bg-sage-50 text-ink-900 ring-1 ring-sage-500"
+                          : "border-sage-200 bg-white text-ink-700 hover:border-sage-400"
+                      }`}
+                    >
+                      {t}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
 
-      </div>
+            <div className="mt-6">
+              <label className="block text-sm font-semibold text-sage-700 uppercase tracking-[0.18em] mb-3">
+                Your email
+              </label>
+              <input
+                type="email"
+                required
+                value={email}
+                placeholder="you@example.com"
+                onChange={(e) => setEmail(e.target.value)}
+                className="w-full rounded-lg border border-sage-200 bg-cream-50 px-4 py-3 text-ink-900 placeholder:text-ink-700/40 focus:outline-none focus:border-sage-500 focus:ring-1 focus:ring-sage-500"
+              />
+            </div>
+
+            <div className="mt-7">
+              <Button
+                type="submit"
+                variant="primary"
+                size="md"
+                className="w-full"
+                disabled={submitting || !time || !email}
+              >
+                {submitting ? "Sending…" : "Confirm Booking"}
+              </Button>
+              <p className="mt-3 text-xs text-ink-700/60 text-center">
+                You'll receive a confirmation email after booking.
+              </p>
+            </div>
+          </div>
+        </form>
+        </FadeIn>
+      </Section>
     </div>
   );
 }

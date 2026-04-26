@@ -33,8 +33,13 @@
     "react": "^18.3.1",
     "react-calendar": "^5.1.0",
     "react-dom": "^18.3.1",
+    "react-helmet-async": "^3.0.0",
     "react-router-dom": "^7.2.0",
-    "tailwind-merge": "^3.0.1"
+    "sharp": "^0.34.5",
+    "svgo": "^4.0.1",
+    "tailwind-merge": "^3.0.1",
+    "vite-plugin-image-optimizer": "^2.0.3",
+    "yet-another-react-lightbox": "^3.31.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.17.0",

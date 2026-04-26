@@ -1,15 +1,17 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { Routes, Route } from "react-router-dom";
 import HomePage from "./pages/HomePage.jsx";
 import Navbar from "./components/NavBar.jsx";
 import Footer from "./components/Footer.jsx";
 import PhotographyPage from "./pages/PhotographyPage.jsx";
-import CollectionPage from "./pages/CollectionPage.jsx"; // ✅ New Collection Page
+import CollectionPage from "./pages/CollectionPage.jsx";
 import AboutPage from "./pages/AboutPage.jsx";
 import ContactPage from "./pages/ContactPage.jsx";
 import UploadPage from "./pages/UploadPage.jsx";
 import ArtworkPage from "./pages/ArtworkPage.jsx";
 import LoginPage from "./pages/LoginPage.jsx";
 import BookingPage from "./pages/BookingPage.jsx";
+import OrderSuccessPage from "./pages/OrderSuccessPage.jsx";
+import NotFoundPage from "./pages/NotFoundPage.jsx";
 
 export default function App() {
   return (
@@ -19,12 +21,14 @@ export default function App() {
         <Route path="/" element={<HomePage />} />
         <Route path="/about" element={<AboutPage />} />
         <Route path="/photography" element={<PhotographyPage />} />
-        <Route path="/photography/:collectionName" element={<CollectionPage />} /> {/* ✅ Collection Pages */}
+        <Route path="/photography/:collectionName" element={<CollectionPage />} />
         <Route path="/contact" element={<ContactPage />} />
         <Route path="/upload" element={<UploadPage />} />
         <Route path="/artwork/:id" element={<ArtworkPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/booking" element={<BookingPage />} />
+        <Route path="/order/success" element={<OrderSuccessPage />} />
+        <Route path="*" element={<NotFoundPage />} />
       </Routes>
       <Footer />
     </div>

@@ -1,56 +1,92 @@
-import { useState, useContext, useEffect } from "react";
+import React, { useState, useContext, useEffect } from "react";
 import { AuthContext } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
+import Button from "../components/Button";
+import SEO from "../components/SEO";
 
 export default function LoginPage() {
-  useEffect(() => {
-    window.scrollTo(0, 0);
-  }, []);
   const { login } = useContext(AuthContext);
   const navigate = useNavigate();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [err, setErr] = useState("");
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    await login(username, password);
-    navigate("/upload");
+    setErr("");
+    setSubmitting(true);
+    try {
+      await login(username, password);
+      navigate("/upload");
+    } catch (e) {
+      console.error("Login failed:", e);
+      setErr("Login failed — check your username and password.");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
-    <div className="min-h-screen font-quicksand flex items-center justify-center bg-gradient-to-b from-[#abbd9a] to-[#9fb293] px-4">
-      <div className="w-full max-w-sm bg-white p-8 rounded-2xl shadow-lg border border-gray-200">
-        <h1 className="text-3xl font-bold text-center text-gray-800 mb-6">Login</h1>
+    <div className="min-h-screen bg-gradient-to-b from-sage-300 to-sage-400 flex items-center justify-center px-4 py-32">
+      <SEO title="Login" description="Admin login — Secrets of Flowers." />
+
+      <div className="w-full max-w-sm bg-white rounded-2xl shadow-xl border border-white/30 p-8">
+        <div className="text-center mb-7">
+          <h1 className="font-Italianno text-5xl text-sage-800 leading-none">
+            Secrets of Flowers
+          </h1>
+          <p className="mt-2 text-xs uppercase tracking-[0.2em] text-sage-700 font-semibold">
+            Admin login
+          </p>
+        </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-gray-700 font-medium">Username</label>
+          <label className="block">
+            <span className="text-sm font-medium text-ink-700">Username</span>
             <input
               type="text"
-              placeholder="Enter username"
-              className="w-full mt-1 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#544265] focus:outline-none"
+              value={username}
               onChange={(e) => setUsername(e.target.value)}
+              placeholder="Username"
               required
+              autoComplete="username"
+              className="mt-2 w-full rounded-lg border border-sage-200 bg-cream-50 px-4 py-3 text-ink-900 placeholder:text-ink-700/40 focus:outline-none focus:border-sage-500 focus:ring-1 focus:ring-sage-500"
             />
-          </div>
+          </label>
 
-          <div>
-            <label className="block text-gray-700 font-medium">Password</label>
+          <label className="block">
+            <span className="text-sm font-medium text-ink-700">Password</span>
             <input
               type="password"
-              placeholder="Enter password"
-              className="w-full mt-1 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#544265] focus:outline-none"
+              value={password}
               onChange={(e) => setPassword(e.target.value)}
+              placeholder="••••••••"
               required
+              autoComplete="current-password"
+              className="mt-2 w-full rounded-lg border border-sage-200 bg-cream-50 px-4 py-3 text-ink-900 placeholder:text-ink-700/40 focus:outline-none focus:border-sage-500 focus:ring-1 focus:ring-sage-500"
             />
-          </div>
+          </label>
 
-          <button
+          {err && (
+            <p className="text-sm text-red-700 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
+              {err}
+            </p>
+          )}
+
+          <Button
             type="submit"
-            className="w-full bg-[#544265] text-white py-3 rounded-lg font-semibold hover:bg-[#6a547a] transition duration-300"
+            variant="primary"
+            size="md"
+            className="w-full"
+            disabled={submitting}
           >
-            Login
-          </button>
+            {submitting ? "Signing in…" : "Sign in"}
+          </Button>
         </form>
       </div>
     </div>

@@ -4,135 +4,13 @@ import "@fortawesome/fontawesome-free/css/all.min.css";
 import bg from "../assets/painting-bg.jpg";
 import { Link } from "react-router-dom";
 import axios from "axios";
+import Section from "../components/Section";
+import Container from "../components/Container";
+import Button from "../components/Button";
+import FadeIn from "../components/FadeIn";
+import SEO from "../components/SEO";
 
-/** —— SOCIAL (links only for Instagram, live embed for Facebook) —— */
-function SocialTwoUp() {
-  const IG_URL = "https://instagram.com/YOUR_USERNAME"; // replace with actual IG
-  const FB_PAGE_URL = "https://www.facebook.com/maireadssecretsofflowers/photos_by";
-
-  return (
-    <section className="py-16 bg-white">
-      <div className="max-w-7xl mx-auto px-6">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* Instagram */}
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 flex flex-col">
-            <div className="flex items-center justify-between">
-              <div>
-                <h3 className="text-2xl font-bold text-gray-900">Instagram</h3>
-                <p className="mt-1 text-gray-600">
-                  Follow along for my latest floral photography.
-                </p>
-              </div>
-              <a
-                href={IG_URL}
-                target="_blank"
-                rel="noreferrer"
-                className="hidden md:inline-flex items-center gap-2 text-[#8b9a71] hover:opacity-80 font-semibold"
-              >
-                Visit <i className="fa-solid fa-arrow-right" />
-              </a>
-            </div>
-
-            <div className="flex-1 flex items-center justify-center mt-6">
-              <a
-                href={IG_URL}
-                target="_blank"
-                rel="noreferrer"
-                className="block w-full h-64 rounded-xl overflow-hidden bg-[#f8faf9] border border-gray-200 hover:border-[#8b9a71] transition text-center flex items-center justify-center"
-              >
-                <i className="fa-brands fa-instagram text-5xl text-[#8b9a71]" />
-              </a>
-            </div>
-
-            <div className="md:hidden text-center mt-6">
-              <a
-                href={IG_URL}
-                target="_blank"
-                rel="noreferrer"
-                className="inline-flex items-center gap-2 text-[#8b9a71] hover:opacity-80 font-semibold"
-              >
-                Visit <i className="fa-solid fa-arrow-right" />
-              </a>
-            </div>
-          </div>
-
-          {/* Facebook */}
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <h3 className="text-2xl font-bold text-gray-900">Facebook</h3>
-                <p className="mt-1 text-gray-600">Live page timeline.</p>
-              </div>
-              <a
-                href={FB_PAGE_URL}
-                target="_blank"
-                rel="noreferrer"
-                className="hidden md:inline-flex items-center gap-2 text-[#8b9a71] hover:opacity-80 font-semibold"
-              >
-                See more <i className="fa-solid fa-arrow-right" />
-              </a>
-            </div>
-
-            {/* Facebook Page Plugin iframe */}
-            <div className="mt-6 rounded-xl overflow-hidden border border-gray-100">
-              <iframe
-                title="Facebook Page"
-                src={`https://www.facebook.com/plugins/page.php?href=${encodeURIComponent(
-                  FB_PAGE_URL
-                )}&tabs=timeline&width=500&height=650&small_header=false&adapt_container_width=true&hide_cover=false&show_facepile=true`}
-                width="100%"
-                height="300"
-                style={{ border: "none", overflow: "hidden" }}
-                scrolling="no"
-                frameBorder="0"
-                allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
-              />
-            </div>
-
-            <div className="md:hidden text-center mt-6">
-              <a
-                href={FB_PAGE_URL}
-                target="_blank"
-                rel="noreferrer"
-                className="inline-flex items-center gap-2 text-[#8b9a71] hover:opacity-80 font-semibold"
-              >
-                See more <i className="fa-solid fa-arrow-right" />
-              </a>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-
-
-/** —— BENEFITS STRIP —— */
-function BenefitsStrip() {
-  const items = [
-    { icon: "fa-solid fa-leaf", title: "Eco-minded", text: "Thoughtful materials and sustainable packaging where possible." },
-    { icon: "fa-solid fa-award", title: "Gallery Quality", text: "Printed with archival inks on premium stock." },
-    { icon: "fa-solid fa-truck", title: "Free Shipping", text: "Complimentary shipping on unframed prints." },
-  ];
-  return (
-    <section className="bg-[#f8faf9] py-12">
-      <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 sm:grid-cols-3 gap-6">
-        {items.map((it, idx) => (
-          <div key={idx} className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 text-center">
-            <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-[#e6eee5]">
-              <i className={`${it.icon} text-lg text-[#657a57]`} />
-            </div>
-            <h3 className="mt-4 font-semibold text-lg text-gray-900">{it.title}</h3>
-            <p className="mt-1 text-gray-600">{it.text}</p>
-          </div>
-        ))}
-      </div>
-    </section>
-  );
-}
-
-/** —— FAVOURITES (dynamic from backend by ID) —— */
+/** —— FAVOURITE PIECES (dynamic from backend by ID) —— */
 function FavouritePieces() {
   const favouriteIds = [
     "68559646312d258b6276e8b3",
@@ -148,7 +26,9 @@ function FavouritePieces() {
       try {
         const res = await Promise.all(
           favouriteIds.map((id) =>
-            axios.get(`https://webdev-backends.onrender.com/flowers/images/${id}`).then((r) => r.data)
+            axios
+              .get(`https://webdev-backends.onrender.com/flowers/images/${id}`)
+              .then((r) => r.data)
           )
         );
         if (mounted) setItems(res);
@@ -162,49 +42,251 @@ function FavouritePieces() {
   }, []);
 
   return (
-    <section id="featured-section" className="max-w-7xl mx-auto px-6 py-20 bg-white">
-      <h2 className="text-4xl font-bold text-center text-gray-900 mb-3">My Favourite Pieces</h2>
-      <p className="text-center text-gray-600 mb-10">A curation of calming botanicals to anchor your space.</p>
+    <Section tone="cream" id="featured-section">
+      <FadeIn className="text-center max-w-2xl mx-auto">
+        <p className="text-sage-600 text-xs uppercase tracking-[0.2em] mb-3">
+          Curated selection
+        </p>
+        <h2 className="text-3xl md:text-4xl font-semibold">My Favourite Pieces</h2>
+        <span className="block w-16 h-[3px] bg-sage-400 rounded-full mt-4 mx-auto" />
+        <p className="mt-5 text-ink-700/80 leading-relaxed">
+          A small set of calming botanicals to anchor your space.
+        </p>
+      </FadeIn>
 
-      {loading ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-          {[...Array(3)].map((_, i) => (
-            <div key={i} className="rounded-2xl overflow-hidden bg-white shadow-lg border border-gray-100">
-              <div className="h-64 bg-gray-200 animate-pulse" />
-              <div className="p-5">
-                <div className="h-5 w-1/2 bg-gray-200 rounded animate-pulse" />
-                <div className="mt-3 h-4 w-24 bg-gray-200 rounded animate-pulse" />
+      <div className="mt-12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+        {loading
+          ? [...Array(3)].map((_, i) => (
+              <div
+                key={i}
+                className="rounded-2xl overflow-hidden bg-white border border-sage-100"
+              >
+                <div className="aspect-[4/5] bg-cream-200 animate-pulse" />
+                <div className="p-5">
+                  <div className="h-5 w-1/2 bg-cream-200 rounded animate-pulse" />
+                  <div className="mt-3 h-4 w-24 bg-cream-200 rounded animate-pulse" />
+                </div>
               </div>
+            ))
+          : items.map((art, idx) => (
+              <FadeIn key={art._id} delay={idx * 0.1}>
+                <Link
+                  to={`/artwork/${art._id}`}
+                  className="group block rounded-2xl overflow-hidden bg-white border border-sage-100 shadow-sm hover:shadow-lg transition"
+                >
+                  <div className="aspect-[4/5] overflow-hidden">
+                    <img
+                      src={art.imageUrl}
+                      alt={art.title}
+                      loading="lazy"
+                      className="w-full h-full object-cover transform group-hover:scale-105 transition duration-500"
+                    />
+                  </div>
+                  <div className="p-5 flex items-center justify-between">
+                    <div>
+                      <h3 className="text-base font-semibold text-ink-900 line-clamp-1">
+                        {art.title}
+                      </h3>
+                      {art.price != null && (
+                        <p className="text-sm text-ink-700/70 mt-0.5">
+                          From €{art.price}
+                        </p>
+                      )}
+                    </div>
+                    <span className="text-sage-600 group-hover:translate-x-0.5 transition inline-flex items-center gap-1.5 text-sm font-medium">
+                      View <i className="fa-solid fa-arrow-right text-xs" />
+                    </span>
+                  </div>
+                </Link>
+              </FadeIn>
+            ))}
+      </div>
+
+      <div className="mt-12 text-center">
+        <Button to="/photography" variant="secondary" size="md">
+          Browse all collections <i className="fa-solid fa-arrow-right text-sm" />
+        </Button>
+      </div>
+    </Section>
+  );
+}
+
+/** —— BENEFITS STRIP —— */
+function BenefitsStrip() {
+  const items = [
+    {
+      icon: "fa-solid fa-leaf",
+      title: "Eco-minded",
+      text: "Thoughtful materials and sustainable packaging where possible.",
+    },
+    {
+      icon: "fa-solid fa-award",
+      title: "Gallery quality",
+      text: "Printed with archival inks on premium stock.",
+    },
+    {
+      icon: "fa-solid fa-truck",
+      title: "Free shipping",
+      text: "Complimentary shipping on unframed prints.",
+    },
+  ];
+  return (
+    <Section tone="white" spacing="tight">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+        {items.map((it, idx) => (
+          <FadeIn
+            key={idx}
+            delay={idx * 0.08}
+            className="bg-cream-50 rounded-2xl p-6 border border-sage-100 text-center"
+          >
+            <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-sage-100">
+              <i className={`${it.icon} text-lg text-sage-700`} />
             </div>
-          ))}
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-          {items.map((art) => (
-            <Link
-              key={art._id}
-              to={`/artwork/${art._id}`}
-              className="group bg-white rounded-2xl shadow-lg overflow-hidden transition duration-500"
+            <h3 className="mt-4 font-semibold text-lg text-ink-900">{it.title}</h3>
+            <p className="mt-1 text-ink-700/80 text-sm leading-relaxed">{it.text}</p>
+          </FadeIn>
+        ))}
+      </div>
+    </Section>
+  );
+}
+
+/** —— TESTIMONIALS —— */
+function Testimonials() {
+  const quotes = [
+    {
+      text: "The print arrived beautifully packaged and the colours are even better in person. It's the centrepiece of our hallway now.",
+      name: "Sarah M.",
+      location: "Cork",
+    },
+    {
+      text: "I joined one of Mairead's photography walks and learned more in two hours than in a year of fiddling on my own. Calm, generous and inspiring.",
+      name: "Niamh O.",
+      location: "Tralee",
+    },
+    {
+      text: "Bought two pieces from the Hope collection as a gift — wrapped to perfection and delivered quickly. Will definitely be back.",
+      name: "Aoife C.",
+      location: "Killarney",
+    },
+  ];
+
+  return (
+    <Section tone="sage-soft">
+      <FadeIn className="text-center max-w-2xl mx-auto">
+        <p className="text-sage-700 text-xs uppercase tracking-[0.2em] mb-3">
+          Kind words
+        </p>
+        <h2 className="text-3xl md:text-4xl font-semibold">From recent collectors</h2>
+        <span className="block w-16 h-[3px] bg-sage-500 rounded-full mt-4 mx-auto" />
+      </FadeIn>
+
+      <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
+        {quotes.map((q, i) => (
+          <FadeIn
+            key={i}
+            delay={i * 0.1}
+            className="relative bg-white rounded-2xl border border-sage-100 p-7 pt-12 shadow-sm"
+          >
+            <span
+              aria-hidden
+              className="absolute top-4 left-6 font-Italianno text-7xl leading-none text-sage-300 select-none"
             >
-              <div className="overflow-hidden relative">
-                <img
-                  src={art.imageUrl}
-                  alt={art.title}
-                  className="w-full h-64 object-cover transform group-hover:scale-105 transition duration-500"
-                  loading="lazy"
-                />
+              "
+            </span>
+            <p className="text-ink-700 leading-relaxed">{q.text}</p>
+            <div className="mt-5 pt-4 border-t border-sage-100 text-sm">
+              <span className="text-ink-900 font-semibold">{q.name}</span>
+              <span className="text-ink-700/70"> · {q.location}</span>
+            </div>
+          </FadeIn>
+        ))}
+      </div>
+    </Section>
+  );
+}
+
+/** —— SOCIAL TWO-UP —— */
+function SocialTwoUp() {
+  const IG_URL = "https://instagram.com/YOUR_USERNAME";
+  const FB_PAGE_URL = "https://www.facebook.com/maireadssecretsofflowers/photos_by";
+
+  return (
+    <Section tone="cream">
+      <FadeIn className="text-center max-w-2xl mx-auto">
+        <p className="text-sage-600 text-xs uppercase tracking-[0.2em] mb-3">
+          Stay in the loop
+        </p>
+        <h2 className="text-3xl md:text-4xl font-semibold">Follow the journey</h2>
+        <span className="block w-16 h-[3px] bg-sage-400 rounded-full mt-4 mx-auto" />
+      </FadeIn>
+
+      <div className="mt-12 grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <FadeIn>
+          <a
+            href={IG_URL}
+            target="_blank"
+            rel="noreferrer"
+            className="group block bg-white rounded-2xl border border-sage-100 p-8 text-center hover:shadow-lg transition h-full"
+          >
+            <div className="inline-flex w-16 h-16 mx-auto rounded-full bg-sage-100 items-center justify-center">
+              <i className="fa-brands fa-instagram text-3xl text-sage-700" />
+            </div>
+            <h3 className="mt-5 text-2xl font-semibold text-ink-900">Instagram</h3>
+            <p className="mt-2 text-ink-700/80 leading-relaxed">
+              Follow along for behind-the-scenes glimpses and the latest floral
+              photography.
+            </p>
+            <span className="mt-6 inline-flex items-center justify-center gap-2 text-sage-700 font-semibold group-hover:gap-3 transition-all">
+              Visit Instagram <i className="fa-solid fa-arrow-right text-sm" />
+            </span>
+          </a>
+        </FadeIn>
+
+        <FadeIn delay={0.1}>
+          <div className="bg-white rounded-2xl border border-sage-100 p-6 flex flex-col h-full">
+            <div className="flex items-center justify-between mb-5">
+              <div>
+                <h3 className="text-2xl font-semibold text-ink-900">Facebook</h3>
+                <p className="text-sm text-ink-700/70 mt-0.5">Live page timeline.</p>
               </div>
-              <div className="p-5 flex items-center justify-between">
-                <h3 className="text-lg font-semibold text-gray-900 line-clamp-1">{art.title}</h3>
-                <span className="text-[#8b9a71] group-hover:translate-x-0.5 transition inline-flex items-center gap-2 font-medium">
-                  View <i className="fa-solid fa-arrow-right text-sm" />
-                </span>
-              </div>
-            </Link>
-          ))}
-        </div>
-      )}
-    </section>
+              <a
+                href={FB_PAGE_URL}
+                target="_blank"
+                rel="noreferrer"
+                className="hidden md:inline-flex items-center gap-2 text-sage-700 hover:text-sage-600 font-semibold text-sm"
+              >
+                See more <i className="fa-solid fa-arrow-right text-xs" />
+              </a>
+            </div>
+
+            <div className="rounded-xl overflow-hidden border border-sage-100 bg-cream-50">
+              <iframe
+                title="Facebook Page"
+                src={`https://www.facebook.com/plugins/page.php?href=${encodeURIComponent(
+                  FB_PAGE_URL
+                )}&tabs=timeline&width=500&height=500&small_header=false&adapt_container_width=true&hide_cover=false&show_facepile=true`}
+                width="100%"
+                height="320"
+                style={{ border: "none", overflow: "hidden" }}
+                allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
+              />
+            </div>
+
+            <div className="md:hidden text-center mt-5">
+              <a
+                href={FB_PAGE_URL}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center gap-2 text-sage-700 font-semibold"
+              >
+                See more <i className="fa-solid fa-arrow-right text-sm" />
+              </a>
+            </div>
+          </div>
+        </FadeIn>
+      </div>
+    </Section>
   );
 }
 
@@ -215,49 +297,47 @@ export default function HomePage() {
 
   return (
     <>
-      {/* —— Hero (unchanged) —— */}
+      <SEO />
+
+      {/* —— HERO —— */}
       <div
-        className="h-screen w-full flex items-center z-0 justify-center relative overflow-hidden bg-cover bg-center"
+        className="relative h-screen w-full flex items-center justify-center overflow-hidden bg-cover bg-center"
         style={{ backgroundImage: `url(${bg})` }}
       >
-        <div className="absolute inset-0 bg-black bg-opacity-40" />
-        <div className="p-6 max-w-6xl mx-auto relative z-50 w-full text-center">
-          <h1 className="text-5xl md:text-8xl font-ptsans font-extrabold text-gray-300 animate-fade-in">
+        <div className="absolute inset-0 bg-black/45" />
+        <Container className="relative z-10 text-center">
+          <p className="text-cream-100/90 text-xs md:text-sm uppercase tracking-[0.3em] mb-6">
+            Botanical photography &amp; fine-art prints
+          </p>
+          <h1 className="font-Italianno text-7xl md:text-[10rem] leading-none text-cream-50 drop-shadow-md">
             Secrets of Flowers
           </h1>
-          <p className="mt-6 font-medium text-lg md:text-xl font-quicksand text-gray-100 max-w-2xl mx-auto leading-relaxed">
-            🌸 Highlighting how much beauty is all around us <br /> in the natural world 🌻
+          <p className="mt-6 text-base md:text-xl font-quicksand text-cream-100/95 max-w-2xl mx-auto leading-relaxed">
+            Highlighting how much beauty is all around us in the natural world.
           </p>
-          <Link
-            to="./photography"
-            className="inline-block bg-[#8b9a71] hover:bg-[#858d6f] text-white px-10 font-quicksand py-4 mt-10 rounded-full text-lg font-semibold shadow-lg hover:shadow-xl transition"
-          >
-            View My Photography
-          </Link>
-        </div>
+          <div className="mt-10 flex flex-wrap gap-4 justify-center">
+            <Button to="/photography" variant="primary" size="lg">
+              View My Photography
+            </Button>
+            <Button to="/about" variant="white" size="lg">
+              Meet Mairead
+            </Button>
+          </div>
+        </Container>
 
-        {/* Scroll-down Icon */}
-        <div className="absolute bottom-16 left-1/2 transform -translate-x-1/2 z-50">
-          <a
-            href="#featured-section"
-            className="flex items-center justify-center w-12 h-12 bg-gray-300 text-gray-900 rounded-full shadow-lg hover:bg-gray-400 transition"
-          >
-            <i className="fa-solid fa-arrow-down text-xl" />
-          </a>
-        </div>
+        <a
+          href="#featured-section"
+          aria-label="Scroll to featured pieces"
+          className="absolute bottom-12 left-1/2 -translate-x-1/2 z-10 inline-flex items-center justify-center w-11 h-11 bg-white/90 hover:bg-white text-sage-800 rounded-full shadow-lg transition"
+        >
+          <i className="fa-solid fa-arrow-down" />
+        </a>
       </div>
 
-      {/* —— Page BG tone after hero —— */}
-      <div className="bg-[#f8faf9]">
-        {/* Favourites */}
-        <FavouritePieces />
-
-        {/* Benefits */}
-        <BenefitsStrip />
-
-        {/* Instagram + Facebook side-by-side */}
-        <SocialTwoUp />
-      </div>
+      <FavouritePieces />
+      <BenefitsStrip />
+      <Testimonials />
+      <SocialTwoUp />
     </>
   );
 }

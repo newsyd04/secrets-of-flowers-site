@@ -1,6 +1,13 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import PageHeader from "../components/PageHeader";
+import Section from "../components/Section";
+import Button from "../components/Button";
+import SEO from "../components/SEO";
+
+const FLOWERS_URL = "https://webdev-backends.onrender.com/flowers";
+const COLLECTIONS = ["The Joy", "Hope", "Sage", "Heart and Soul", "The Irish Boreen"];
 
 export default function UploadPage() {
   const navigate = useNavigate();
@@ -9,49 +16,41 @@ export default function UploadPage() {
   const [collection, setCollection] = useState("");
   const [image, setImage] = useState(null);
   const [images, setImages] = useState([]);
+  const [frameToggles, setFrameToggles] = useState({});
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [uploading, setUploading] = useState(false);
 
   useEffect(() => {
     window.scrollTo(0, 0);
-    checkAuthStatus();
-    fetchImages();
-  }, []);
-
-  const checkAuthStatus = () => {
     const token = localStorage.getItem("token");
     if (!token) {
       navigate("/login");
-    } else {
-      setIsAuthenticated(true);
+      return;
     }
-  };
-
-  const [frameToggles, setFrameToggles] = useState({});
-
-  useEffect(() => {
-    axios.get(`${flowersUrl}/frames`).then((res) => setFrameToggles(res.data));
+    setIsAuthenticated(true);
+    fetchImages();
+    axios.get(`${FLOWERS_URL}/frames`).then((res) => setFrameToggles(res.data));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  const toggleFrame = async (name) => {
-    const token = localStorage.getItem("token");
-    await axios.put(`${flowersUrl}/frames/${name}/toggle`, {}, {
-      headers: { Authorization: token },
-    });
-    const res = await axios.get(`${flowersUrl}/frames`);
-    setFrameToggles(res.data);
-  };
-
-  // Use environment variable or fallback to the deployed master server URL with /flowers prefix
-  const baseUrl = "https://webdev-backends.onrender.com";
-  const flowersUrl = `${baseUrl}/flowers`;
 
   const fetchImages = async () => {
     try {
-      const res = await axios.get(`${flowersUrl}/images`);
+      const res = await axios.get(`${FLOWERS_URL}/images`);
       setImages(res.data);
     } catch (error) {
       console.error("Error fetching images:", error);
     }
+  };
+
+  const toggleFrame = async (name) => {
+    const token = localStorage.getItem("token");
+    await axios.put(
+      `${FLOWERS_URL}/frames/${name}/toggle`,
+      {},
+      { headers: { Authorization: token } }
+    );
+    const res = await axios.get(`${FLOWERS_URL}/frames`);
+    setFrameToggles(res.data);
   };
 
   const handleUpload = async (e) => {
@@ -65,136 +64,212 @@ export default function UploadPage() {
     formData.append("collection", collection);
     formData.append("image", image);
 
+    setUploading(true);
     try {
       const token = localStorage.getItem("token");
-      const res = await axios.post(`${flowersUrl}/upload`, formData, {
+      const res = await axios.post(`${FLOWERS_URL}/upload`, formData, {
         headers: { Authorization: token },
       });
-      setImages([...images, res.data]);
+      setImages((prev) => [...prev, res.data]);
       setTitle("");
       setPrice("");
       setCollection("");
       setImage(null);
+      e.target.reset?.();
     } catch (error) {
       console.error("Upload failed:", error);
+      alert("Upload failed.");
+    } finally {
+      setUploading(false);
     }
   };
 
   const deleteImage = async (id) => {
-  try {
-    const token = localStorage.getItem("token");
-    await axios.delete(`${flowersUrl}/images/${id}`, {
-      headers: { Authorization: token },
-    });
-    setImages(images.filter((img) => img._id !== id));
-  } catch (error) {
-    console.error("Error deleting image:", error);
-  }
-};
+    if (!window.confirm("Delete this listing?")) return;
+    try {
+      const token = localStorage.getItem("token");
+      await axios.delete(`${FLOWERS_URL}/images/${id}`, {
+        headers: { Authorization: token },
+      });
+      setImages((prev) => prev.filter((img) => img._id !== id));
+    } catch (error) {
+      console.error("Error deleting image:", error);
+    }
+  };
+
+  if (!isAuthenticated) return null;
 
   return (
-    isAuthenticated && (
-      <div className="min-h-screen font-quicksand bg-[#e0cca4] text-gray-900 pt-32 p-16">
-        <div className="flex flex-col lg:flex-row gap-8 justify-center">
+    <div className="min-h-screen">
+      <SEO title="Upload Panel" />
+
+      <PageHeader
+        eyebrow="Admin"
+        title="Upload Panel"
+        description="Add new listings, manage frame availability, and curate the public gallery."
+      />
+
+      <Section tone="cream">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Upload Form */}
-          <div className="w-full lg:w-1/2 bg-white p-8 rounded-lg shadow-lg border border-[#544265]">
-          <h1 className="text-4xl text-center text-[#544265] mb-12">Upload Panel</h1>
-            <form onSubmit={handleUpload} className="space-y-4">
-              <input
-                type="text"
-                placeholder="Artwork Title"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#544265]"
-                required
-              />
-              <input
-                type="number"
-                placeholder="Price (€)"
-                value={price}
-                onChange={(e) => setPrice(e.target.value)}
-                className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#544265]"
-                required
-              />
-              <select
-                value={collection}
-                onChange={(e) => setCollection(e.target.value)}
-                className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#544265]"
-                required
-              >
-                <option value="">Select Collection</option>
-                {["The Joy", "Hope", "Sage", "Heart and Soul", "The Irish Boreen"].map((col) => (
-                  <option key={col} value={col}>
-                    {col}
-                  </option>
-                ))}
-              </select>
-              <input
-                type="file"
-                accept="image/*"
-                onChange={(e) => setImage(e.target.files[0])}
-                className="w-full p-3 border border-gray-300 rounded-md"
-                required
-              />
-              <button
+          <div className="bg-white rounded-2xl border border-sage-100 shadow-sm p-8">
+            <h2 className="text-xl font-semibold text-ink-900">New listing</h2>
+            <p className="mt-1 text-sm text-ink-700/70">
+              Cloudinary handles the image upload — large files are fine.
+            </p>
+
+            <form onSubmit={handleUpload} className="mt-6 space-y-4">
+              <label className="block">
+                <span className="text-sm font-medium text-ink-700">Title</span>
+                <input
+                  type="text"
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  placeholder="Artwork title"
+                  required
+                  className="mt-2 w-full rounded-lg border border-sage-200 bg-cream-50 px-4 py-3 text-ink-900 placeholder:text-ink-700/40 focus:outline-none focus:border-sage-500 focus:ring-1 focus:ring-sage-500"
+                />
+              </label>
+
+              <label className="block">
+                <span className="text-sm font-medium text-ink-700">Price (€)</span>
+                <input
+                  type="number"
+                  value={price}
+                  onChange={(e) => setPrice(e.target.value)}
+                  placeholder="80"
+                  required
+                  className="mt-2 w-full rounded-lg border border-sage-200 bg-cream-50 px-4 py-3 text-ink-900 placeholder:text-ink-700/40 focus:outline-none focus:border-sage-500 focus:ring-1 focus:ring-sage-500"
+                />
+              </label>
+
+              <label className="block">
+                <span className="text-sm font-medium text-ink-700">Collection</span>
+                <select
+                  value={collection}
+                  onChange={(e) => setCollection(e.target.value)}
+                  required
+                  className="mt-2 w-full rounded-lg border border-sage-200 bg-cream-50 px-4 py-3 text-ink-900 focus:outline-none focus:border-sage-500 focus:ring-1 focus:ring-sage-500"
+                >
+                  <option value="">Select collection…</option>
+                  {COLLECTIONS.map((c) => (
+                    <option key={c} value={c}>
+                      {c}
+                    </option>
+                  ))}
+                </select>
+              </label>
+
+              <label className="block">
+                <span className="text-sm font-medium text-ink-700">Image</span>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => setImage(e.target.files[0])}
+                  required
+                  className="mt-2 w-full text-sm text-ink-700 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-sage-100 file:text-sage-700 hover:file:bg-sage-200"
+                />
+              </label>
+
+              <Button
                 type="submit"
-                className="w-full bg-[#544265] text-white py-3 rounded-md font-semibold hover:bg-[#6a547a] transition"
+                variant="primary"
+                size="md"
+                className="w-full"
+                disabled={uploading}
               >
-                Upload Listing
-              </button>
+                {uploading ? "Uploading…" : "Upload listing"}
+              </Button>
             </form>
           </div>
 
-          {/* Frame Toggle Panel */}
-          <div className="w-full lg:w-1/2 bg-white p-8 rounded-lg shadow-lg border border-[#544265]">
-            <h2 className="text-2xl font-bold text-[#544265] mb-4">Toggle Frame Availability</h2>
-            <div className="space-y-3">
-              {Object.entries(frameToggles).map(([name, available]) => (
-                <div key={name} className="flex justify-between items-center border p-3 rounded-md">
-                  <span className="font-medium text-gray-800">{name}</span>
-                  <button
-                    onClick={() => toggleFrame(name)}
-                    className={`px-4 py-2 rounded text-white font-semibold ${
-                      available ? "bg-red-500 hover:bg-red-600" : "bg-green-500 hover:bg-green-600"
-                    } transition`}
+          {/* Frame toggles */}
+          <div className="bg-white rounded-2xl border border-sage-100 shadow-sm p-8">
+            <h2 className="text-xl font-semibold text-ink-900">Frame availability</h2>
+            <p className="mt-1 text-sm text-ink-700/70">
+              Toggle frames on or off for the public artwork pages.
+            </p>
+
+            <div className="mt-6 space-y-2">
+              {Object.entries(frameToggles).length === 0 ? (
+                <p className="text-sm text-ink-700/60">No frames loaded.</p>
+              ) : (
+                Object.entries(frameToggles).map(([name, available]) => (
+                  <div
+                    key={name}
+                    className="flex justify-between items-center border border-sage-100 rounded-xl px-4 py-3 bg-cream-50"
                   >
-                    {available ? "Disable" : "Enable"}
-                  </button>
-                </div>
-              ))}
+                    <div className="flex items-center gap-3">
+                      <span
+                        className={`inline-block w-2.5 h-2.5 rounded-full ${
+                          available ? "bg-sage-500" : "bg-ink-700/30"
+                        }`}
+                      />
+                      <span className="text-ink-900 font-medium">{name}</span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => toggleFrame(name)}
+                      className={`px-4 py-1.5 text-sm font-semibold rounded-full transition ${
+                        available
+                          ? "bg-ink-700/10 text-ink-900 hover:bg-ink-700/20"
+                          : "bg-sage-500 text-white hover:bg-sage-600"
+                      }`}
+                    >
+                      {available ? "Disable" : "Enable"}
+                    </button>
+                  </div>
+                ))
+              )}
             </div>
           </div>
         </div>
-        {/* Uploaded Listings Styled Like Upload Panel */}
-        <div className="mt-20 max-w-7xl mx-auto">
-          <h2 className="text-4xl text-center text-[#544265] mb-10">Uploaded Listings</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-            {images.map((img) => (
-              <div
-                key={img._id}
-                className="bg-white border border-[#544265] rounded-lg shadow-lg p-6 flex flex-col justify-between"
-              >
+      </Section>
+
+      {/* Listings */}
+      <Section tone="white">
+        <div className="text-center mb-10">
+          <p className="text-sage-600 text-xs uppercase tracking-[0.2em] mb-3">
+            Live listings
+          </p>
+          <h2 className="text-3xl md:text-4xl font-semibold">
+            Uploaded artwork ({images.length})
+          </h2>
+          <span className="block w-16 h-[3px] bg-sage-400 rounded-full mt-4 mx-auto" />
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {images.map((img) => (
+            <div
+              key={img._id}
+              className="bg-white rounded-2xl border border-sage-100 shadow-sm overflow-hidden flex flex-col"
+            >
+              <div className="aspect-[4/5] overflow-hidden bg-cream-100">
                 <img
                   src={img.imageUrl}
                   alt={img.title}
-                  className="w-full h-56 object-cover rounded-md mb-4 border border-gray-200"
+                  loading="lazy"
+                  className="w-full h-full object-cover"
                 />
-                <div className="space-y-1">
-                  <h3 className="text-xl font-bold text-[#544265]">{img.title}</h3>
-                  <p className="text-gray-700 font-medium">€{img.price}</p>
-                  <p className="text-sm text-gray-500 italic">{img.collection}</p>
-                </div>
+              </div>
+              <div className="p-5 flex-1 flex flex-col">
+                <h3 className="font-semibold text-ink-900">{img.title}</h3>
+                <p className="text-sm text-ink-700/70 mt-1">€{img.price}</p>
+                <p className="text-xs uppercase tracking-[0.18em] text-sage-700 mt-2">
+                  {img.collection}
+                </p>
                 <button
+                  type="button"
                   onClick={() => deleteImage(img._id)}
-                  className="mt-4 bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md font-semibold transition"
+                  className="mt-5 inline-flex items-center justify-center gap-2 px-4 py-2 rounded-full text-sm font-semibold border border-red-200 text-red-700 hover:bg-red-50 transition"
                 >
-                  Delete
+                  <i className="fa-solid fa-trash text-xs" /> Delete
                 </button>
               </div>
-            ))}
-          </div>
+            </div>
+          ))}
         </div>
-      </div>
-    )
+      </Section>
+    </div>
   );
 }
