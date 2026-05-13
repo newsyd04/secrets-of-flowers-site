@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import axios from "axios";
 import Lightbox from "yet-another-react-lightbox";
@@ -10,6 +10,7 @@ import Section from "../components/Section";
 import Button from "../components/Button";
 import FadeIn from "../components/FadeIn";
 import SEO from "../components/SEO";
+import { API_BASE } from "../config/api";
 
 const COLLECTION_DESCRIPTIONS = {
   "the joy": "A collection celebrating pure happiness and vibrant energy.",
@@ -41,7 +42,7 @@ export default function CollectionPage() {
     setLoading(true);
     setErr("");
     axios
-      .get(`https://webdev-backends.onrender.com/flowers/images/collection/${rawName}`)
+      .get(`${API_BASE}/images/collection/${rawName}`)
       .then((res) => {
         if (!mounted) return;
         setArtworks(res.data || []);

@@ -1,9 +1,8 @@
 import { createContext, useState, useEffect } from "react";
 import axios from "axios";
+import { API_BASE } from "../config/api";
 
 export const AuthContext = createContext();
-
-const API_BASE = "https://webdev-backends.onrender.com/flowers";
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);

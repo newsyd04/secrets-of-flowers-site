@@ -1,12 +1,12 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import PageHeader from "../components/PageHeader";
 import Section from "../components/Section";
 import Button from "../components/Button";
 import SEO from "../components/SEO";
+import { API_BASE } from "../config/api";
 
-const FLOWERS_URL = "https://webdev-backends.onrender.com/flowers";
 const COLLECTIONS = ["The Joy", "Hope", "Sage", "Heart and Soul", "The Irish Boreen"];
 
 export default function UploadPage() {
@@ -29,13 +29,13 @@ export default function UploadPage() {
     }
     setIsAuthenticated(true);
     fetchImages();
-    axios.get(`${FLOWERS_URL}/frames`).then((res) => setFrameToggles(res.data));
+    axios.get(`${API_BASE}/frames`).then((res) => setFrameToggles(res.data));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const fetchImages = async () => {
     try {
-      const res = await axios.get(`${FLOWERS_URL}/images`);
+      const res = await axios.get(`${API_BASE}/images`);
       setImages(res.data);
     } catch (error) {
       console.error("Error fetching images:", error);
@@ -45,11 +45,11 @@ export default function UploadPage() {
   const toggleFrame = async (name) => {
     const token = localStorage.getItem("token");
     await axios.put(
-      `${FLOWERS_URL}/frames/${name}/toggle`,
+      `${API_BASE}/frames/${name}/toggle`,
       {},
       { headers: { Authorization: token } }
     );
-    const res = await axios.get(`${FLOWERS_URL}/frames`);
+    const res = await axios.get(`${API_BASE}/frames`);
     setFrameToggles(res.data);
   };
 
@@ -67,7 +67,7 @@ export default function UploadPage() {
     setUploading(true);
     try {
       const token = localStorage.getItem("token");
-      const res = await axios.post(`${FLOWERS_URL}/upload`, formData, {
+      const res = await axios.post(`${API_BASE}/upload`, formData, {
         headers: { Authorization: token },
       });
       setImages((prev) => [...prev, res.data]);
@@ -88,7 +88,7 @@ export default function UploadPage() {
     if (!window.confirm("Delete this listing?")) return;
     try {
       const token = localStorage.getItem("token");
-      await axios.delete(`${FLOWERS_URL}/images/${id}`, {
+      await axios.delete(`${API_BASE}/images/${id}`, {
         headers: { Authorization: token },
       });
       setImages((prev) => prev.filter((img) => img._id !== id));

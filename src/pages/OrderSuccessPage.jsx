@@ -1,13 +1,11 @@
-"use client";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useLocation, useSearchParams, Navigate } from "react-router-dom";
 import axios from "axios";
 import PageHeader from "../components/PageHeader";
 import Section from "../components/Section";
 import Button from "../components/Button";
 import SEO from "../components/SEO";
-
-const API_BASE = "https://webdev-backends.onrender.com/flowers";
+import { API_BASE } from "../config/api";
 
 export default function OrderSuccessPage() {
   const { state } = useLocation();

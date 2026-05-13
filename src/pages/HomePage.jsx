@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import "@fortawesome/fontawesome-free/css/all.min.css";
 import bg from "../assets/painting-bg.jpg";
 import { Link } from "react-router-dom";
@@ -9,14 +9,16 @@ import Container from "../components/Container";
 import Button from "../components/Button";
 import FadeIn from "../components/FadeIn";
 import SEO from "../components/SEO";
+import { API_BASE } from "../config/api";
+
+const FAVOURITE_IDS = [
+  "68559646312d258b6276e8b3",
+  "6855981f312d258b6276e8b9",
+  "685438a5312d258b6276e89a",
+];
 
 /** —— FAVOURITE PIECES (dynamic from backend by ID) —— */
 function FavouritePieces() {
-  const favouriteIds = [
-    "68559646312d258b6276e8b3",
-    "6855981f312d258b6276e8b9",
-    "685438a5312d258b6276e89a",
-  ];
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -25,9 +27,9 @@ function FavouritePieces() {
     (async () => {
       try {
         const res = await Promise.all(
-          favouriteIds.map((id) =>
+          FAVOURITE_IDS.map((id) =>
             axios
-              .get(`https://webdev-backends.onrender.com/flowers/images/${id}`)
+              .get(`${API_BASE}/images/${id}`)
               .then((r) => r.data)
           )
         );

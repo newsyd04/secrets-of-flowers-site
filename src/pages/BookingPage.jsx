@@ -8,32 +8,89 @@ import Section from "../components/Section";
 import Button from "../components/Button";
 import FadeIn from "../components/FadeIn";
 import SEO from "../components/SEO";
+import { API_BASE } from "../config/api";
 
 const TIMES = ["10:00 AM", "12:00 PM", "2:00 PM"];
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+function toISODate(value) {
+  const offsetDate = new Date(value.getTime() - value.getTimezoneOffset() * 60000);
+  return offsetDate.toISOString().slice(0, 10);
+}
+
+function normalizeUnavailableTimes(data) {
+  if (Array.isArray(data)) return data;
+  if (Array.isArray(data?.unavailableTimes)) return data.unavailableTimes;
+  if (Array.isArray(data?.bookedTimes)) return data.bookedTimes;
+  if (Array.isArray(data?.times)) return data.times;
+  return [];
+}
 
 export default function BookingPage() {
   const [date, setDate] = useState(new Date());
   const [time, setTime] = useState("");
   const [email, setEmail] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [unavailableTimes, setUnavailableTimes] = useState([]);
+  const [loadingAvailability, setLoadingAvailability] = useState(false);
+  const [availabilityEnabled, setAvailabilityEnabled] = useState(true);
 
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
 
+  useEffect(() => {
+    let mounted = true;
+    setTime("");
+    setUnavailableTimes([]);
+    setLoadingAvailability(true);
+
+    axios
+      .get(`${API_BASE}/availability`, { params: { date: toISODate(date) } })
+      .then(({ data }) => {
+        if (!mounted) return;
+        setUnavailableTimes(normalizeUnavailableTimes(data));
+        setAvailabilityEnabled(true);
+      })
+      .catch((error) => {
+        if (!mounted) return;
+        if (error?.response?.status === 404) {
+          setAvailabilityEnabled(false);
+        } else {
+          console.error("Availability error:", error);
+        }
+      })
+      .finally(() => {
+        if (mounted) setLoadingAvailability(false);
+      });
+
+    return () => {
+      mounted = false;
+    };
+  }, [date]);
+
   const handleBooking = async (e) => {
     e.preventDefault();
-    if (!time || !email) return;
+    const cleanedEmail = email.trim();
+    if (!time || !EMAIL_RE.test(cleanedEmail)) return;
+    if (unavailableTimes.includes(time)) return;
+
     setSubmitting(true);
     try {
-      const res = await axios.post(
-        "https://webdev-backends.onrender.com/flowers/book",
-        { date, time, email }
-      );
+      const res = await axios.post(`${API_BASE}/book`, {
+        date: toISODate(date),
+        time,
+        email: cleanedEmail,
+      });
       alert(res.data.message);
+      setEmail("");
+      setTime("");
     } catch (error) {
       console.error("Booking error:", error);
-      alert("Couldn't submit your booking — please try again.");
+      const message =
+        error?.response?.data?.message ||
+        "Couldn't submit your booking — please try again.";
+      alert(message);
     } finally {
       setSubmitting(false);
     }
@@ -117,14 +174,18 @@ export default function BookingPage() {
               <div className="grid grid-cols-3 gap-2">
                 {TIMES.map((t) => {
                   const active = time === t;
+                  const unavailable = unavailableTimes.includes(t);
                   return (
                     <button
                       key={t}
                       type="button"
-                      onClick={() => setTime(t)}
+                      onClick={() => !unavailable && setTime(t)}
+                      disabled={unavailable || loadingAvailability}
                       className={`rounded-xl border px-3 py-2.5 text-sm font-medium transition ${
                         active
                           ? "border-sage-500 bg-sage-50 text-ink-900 ring-1 ring-sage-500"
+                          : unavailable
+                          ? "border-sage-100 bg-ink-700/5 text-ink-700/35 cursor-not-allowed"
                           : "border-sage-200 bg-white text-ink-700 hover:border-sage-400"
                       }`}
                     >
@@ -145,6 +206,7 @@ export default function BookingPage() {
                 value={email}
                 placeholder="you@example.com"
                 onChange={(e) => setEmail(e.target.value)}
+                aria-invalid={email.length > 0 && !EMAIL_RE.test(email.trim())}
                 className="w-full rounded-lg border border-sage-200 bg-cream-50 px-4 py-3 text-ink-900 placeholder:text-ink-700/40 focus:outline-none focus:border-sage-500 focus:ring-1 focus:ring-sage-500"
               />
             </div>
@@ -155,12 +217,19 @@ export default function BookingPage() {
                 variant="primary"
                 size="md"
                 className="w-full"
-                disabled={submitting || !time || !email}
+                disabled={
+                  submitting ||
+                  loadingAvailability ||
+                  !time ||
+                  !EMAIL_RE.test(email.trim())
+                }
               >
                 {submitting ? "Sending…" : "Confirm Booking"}
               </Button>
               <p className="mt-3 text-xs text-ink-700/60 text-center">
-                You'll receive a confirmation email after booking.
+                {availabilityEnabled
+                  ? "You'll receive a confirmation email after booking."
+                  : "You'll receive a confirmation email after booking. Availability is confirmed by email."}
               </p>
             </div>
           </div>

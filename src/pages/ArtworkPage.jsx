@@ -1,11 +1,11 @@
-"use client";
-import React, { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
 import { PayPalButtons, PayPalScriptProvider } from "@paypal/react-paypal-js";
 
 import Container from "../components/Container";
 import SEO from "../components/SEO";
+import { API_BASE, PAYPAL_CLIENT_ID } from "../config/api";
 
 const FRAME_SURCHARGE = 35;
 const SIZE_UPCHARGE = { Small: 0, Medium: 10, Large: 45 };
@@ -110,7 +110,7 @@ export default function ArtworkPage() {
 
   useEffect(() => {
     axios
-      .get(`https://webdev-backends.onrender.com/flowers/images/${id}`)
+      .get(`${API_BASE}/images/${id}`)
       .then((res) => {
         setArtwork(res.data);
         setLoading(false);
@@ -120,10 +120,10 @@ export default function ArtworkPage() {
 
   useEffect(() => {
     axios
-      .get("https://webdev-backends.onrender.com/flowers/frames")
+      .get(`${API_BASE}/frames`)
       .then((res) => {
         const available = Object.entries(res.data)
-          .filter(([_, v]) => v)
+          .filter(([, v]) => v)
           .map(([k]) => k);
         setFrameOptions(available);
       })
@@ -323,8 +323,7 @@ export default function ArtworkPage() {
               <div className="mt-5">
                 <PayPalScriptProvider
                   options={{
-                    "client-id":
-                      "AdtcN9nf2NX3EQ0rYjsotpfCIfUF1CnyzVTr9B1XDa-nGdB3RZDgIDOJqlQ-pKESRzEWLwrbDXs3WJsH",
+                    "client-id": PAYPAL_CLIENT_ID,
                     currency: "EUR",
                   }}
                 >
@@ -332,7 +331,7 @@ export default function ArtworkPage() {
                     style={{ layout: "horizontal", color: "black", shape: "pill", label: "checkout" }}
                     createOrder={async () => {
                       const response = await axios.post(
-                        "https://webdev-backends.onrender.com/flowers/create-paypal-order",
+                        `${API_BASE}/create-paypal-order`,
                         { artworkId: artwork._id, size, frame }
                       );
                       return response.data.id;
@@ -340,7 +339,7 @@ export default function ArtworkPage() {
                     onApprove={async (data) => {
                       try {
                         const res = await axios.post(
-                          "https://webdev-backends.onrender.com/flowers/capture-paypal-order",
+                          `${API_BASE}/capture-paypal-order`,
                           { orderId: data.orderID, artworkId: artwork._id, size, frame }
                         );
                         const payerName =
