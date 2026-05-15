@@ -12,21 +12,57 @@ const SIZE_UPCHARGE = { Small: 0, Medium: 10, Large: 45 };
 
 const SIZE_META = {
   Small: { label: "Small", cm: [20.2, 20.2], in: [8, 8], mounted: true },
-  Medium: { label: "Medium", cm: [25.3, 30.7], in: [10, 12], mounted: false },
-  Large: { label: "Large", cm: [40.5, 50.7], in: [16, 20], mounted: false },
+  Medium: { label: "Medium", cm: [25.3, 30.7], in: [10, 12], mounted: true },
+  Large: { label: "Large", cm: [40.5, 50.7], in: [16, 20], mounted: true },
 };
 
-// Visual wall reference = the print-display zone above a piece of furniture.
-// Most prints hang in this zone, so the scale here matches what a buyer
-// will actually see in their room.
-const WALL_HEIGHT_CM = 110;
+// The room preview uses one shared scale so the artwork and furniture stay
+// proportional. The preview frame is 5:4, so 220cm tall maps to 275cm wide.
+const ROOM_HEIGHT_CM = 220;
+const ROOM_WIDTH_CM = 275;
+const cmToHeightPct = (cm) => (cm / ROOM_HEIGHT_CM) * 100;
+const cmToWidthPct = (cm) => (cm / ROOM_WIDTH_CM) * 100;
 
-/** —— PRINT ON WALL — physically-accurate scale preview, "lived-in" feel —— */
+const ROOM_SCALE = {
+  chair: { width: 88, height: 82, left: 18, bottom: 18 },
+  sideTable: { width: 58, height: 98, right: 32, bottom: 18 },
+  print: { centerLeft: 165, bottom: 125 },
+};
+
+const FRAME_STYLES = {
+  black: {
+    background: "linear-gradient(135deg, #171412, #312a25 52%, #0f0d0c)",
+    boxShadow: "0 16px 30px rgba(15, 15, 15, 0.32)",
+  },
+  white: {
+    background: "linear-gradient(135deg, #fffdf8, #ece5da 52%, #faf7f0)",
+    boxShadow: "0 14px 26px rgba(92, 78, 60, 0.2)",
+  },
+  wood: {
+    background: "linear-gradient(135deg, #6f4426, #a97843 45%, #4f301d)",
+    boxShadow: "0 16px 30px rgba(74, 48, 28, 0.28)",
+  },
+  default: {
+    background: "linear-gradient(135deg, #2b2520, #55483c 52%, #201b17)",
+    boxShadow: "0 16px 30px rgba(15, 15, 15, 0.28)",
+  },
+};
+
+function getFrameStyle(frame) {
+  const name = String(frame || "").toLowerCase();
+  if (name.includes("black")) return FRAME_STYLES.black;
+  if (name.includes("white")) return FRAME_STYLES.white;
+  if (name.includes("wood") || name.includes("oak")) return FRAME_STYLES.wood;
+  return FRAME_STYLES.default;
+}
+
+/** PRINT ON WALL - physically-accurate scale preview with room context */
 function PrintOnWall({ artwork, size, frame }) {
   const meta = SIZE_META[size];
-  const printHeightPct = (meta.cm[1] / WALL_HEIGHT_CM) * 100;
+  const printHeightPct = cmToHeightPct(meta.cm[1]);
   const aspectRatio = meta.cm[0] / meta.cm[1];
   const isFramed = frame !== "Unframed";
+  const frameStyle = getFrameStyle(frame);
 
   return (
     <div className="rounded-2xl overflow-hidden border border-sage-100 bg-white">
@@ -35,63 +71,89 @@ function PrintOnWall({ artwork, size, frame }) {
           On the wall
         </span>
         <span className="text-xs text-ink-700/70">
-          {meta.label} · {meta.in.join("×")}in
+          {meta.label} · {meta.in.join("×")}in total mounted
         </span>
       </div>
 
-      <div className="relative w-full aspect-[5/4] overflow-hidden bg-gradient-to-b from-cream-100 via-cream-100 to-cream-200">
-        {/* Soft warm window-light, top-left */}
-        <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(ellipse_60%_45%_at_12%_-5%,_rgba(255,243,214,0.85),_transparent_60%)]" />
+      <div className="relative w-full aspect-[5/4] overflow-hidden bg-gradient-to-b from-[#f3eadf] via-[#eee1d2] to-[#d7c4ad]">
+        <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(ellipse_58%_45%_at_18%_0%,_rgba(255,249,235,0.82),_transparent_62%)]" />
+        <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(ellipse_at_center,_transparent_58%,_rgba(62,47,33,0.12)_100%)]" />
 
-        {/* Subtle wall texture / vignette */}
-        <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(ellipse_at_center,_transparent_55%,_rgba(40,30,20,0.07)_100%)]" />
+        {/* Floor and skirting line */}
+        <div className="absolute left-0 right-0 bottom-0 h-[25%] bg-gradient-to-b from-[#cdb89d] to-[#bca483]" />
+        <div className="absolute left-0 right-0 bottom-[25%] h-px bg-[#9d8466]/55" />
 
-        {/* Furniture band at the bottom — sideboard / sofa back silhouette */}
-        <div className="absolute bottom-0 left-0 right-0 h-[19%]">
-          <div className="absolute inset-0 bg-gradient-to-t from-sage-700/55 via-sage-500/35 to-sage-300/0" />
-          {/* Top edge highlight */}
-          <div className="absolute top-0 left-0 right-0 h-px bg-sage-700/40" />
-          {/* Lamp silhouette, lower-left */}
-          <div className="absolute bottom-0 left-[6%] w-[7%] h-[78%]">
-            <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[35%] h-[55%] bg-ink-900/45 rounded-sm" />
-            <div className="absolute bottom-[55%] left-1/2 -translate-x-1/2 w-full h-[38%] bg-cream-100/85 rounded-t-md shadow-sm" />
-          </div>
-          {/* Plant / vase silhouette, lower-right */}
-          <div className="absolute bottom-0 right-[7%] w-[8%] h-[70%]">
-            <div className="absolute bottom-0 left-[20%] right-[20%] h-[40%] bg-ink-900/55 rounded-b-md" />
-            <div className="absolute bottom-[35%] left-0 right-0 h-[80%] bg-sage-700/45 rounded-full" />
-            <div className="absolute bottom-[55%] left-[15%] right-[15%] h-[55%] bg-sage-600/40 rounded-full" />
-          </div>
-        </div>
-
-        {/* The print, anchored above the furniture, sized to scale */}
+        {/* Armchair */}
         <div
-          className="absolute left-1/2 -translate-x-1/2 transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]"
+          className="absolute"
           style={{
-            height: `${printHeightPct}%`,
-            aspectRatio,
-            bottom: "26%",
+            left: `${cmToWidthPct(ROOM_SCALE.chair.left)}%`,
+            bottom: `${cmToHeightPct(ROOM_SCALE.chair.bottom)}%`,
+            width: `${cmToWidthPct(ROOM_SCALE.chair.width)}%`,
+            height: `${cmToHeightPct(ROOM_SCALE.chair.height)}%`,
           }}
         >
-          <div
-            className={`relative w-full h-full transition-all duration-500 ${
-              isFramed
-                ? "p-[5%] bg-ink-900 shadow-[0_14px_30px_rgba(15,15,15,0.28)]"
-                : "p-0 bg-white shadow-[0_10px_24px_rgba(15,15,15,0.18)] ring-1 ring-cream-200"
-            }`}
-          >
-            <img
-              src={artwork.imageUrl}
-              alt={`${artwork.title} preview at ${size}`}
-              className="w-full h-full object-cover block"
-              draggable={false}
-            />
+          <div className="absolute left-[10%] right-[10%] bottom-[21%] h-[66%] rounded-t-[34%] bg-sage-600 shadow-[0_18px_26px_rgba(65,70,45,0.24)]" />
+          <div className="absolute left-[2%] bottom-[19%] w-[23%] h-[53%] rounded-t-full rounded-b-md bg-sage-700" />
+          <div className="absolute right-[2%] bottom-[19%] w-[23%] h-[53%] rounded-t-full rounded-b-md bg-sage-700" />
+          <div className="absolute left-[9%] right-[9%] bottom-[4%] h-[34%] rounded-xl bg-sage-800" />
+          <div className="absolute left-[18%] bottom-0 w-[7%] h-[13%] bg-[#6d573f] rounded-b-sm" />
+          <div className="absolute right-[18%] bottom-0 w-[7%] h-[13%] bg-[#6d573f] rounded-b-sm" />
+        </div>
+
+        {/* Side table with lamp and small decor */}
+        <div
+          className="absolute"
+          style={{
+            right: `${cmToWidthPct(ROOM_SCALE.sideTable.right)}%`,
+            bottom: `${cmToHeightPct(ROOM_SCALE.sideTable.bottom)}%`,
+            width: `${cmToWidthPct(ROOM_SCALE.sideTable.width)}%`,
+            height: `${cmToHeightPct(ROOM_SCALE.sideTable.height)}%`,
+          }}
+        >
+          <div className="absolute left-[22%] right-[22%] bottom-[14%] h-[45%] bg-[#775d42] rounded-sm shadow-[0_14px_20px_rgba(75,55,35,0.22)]" />
+          <div className="absolute left-[8%] right-[8%] bottom-[55%] h-[8%] bg-[#8c6f4d] rounded-full" />
+          <div className="absolute left-[48%] bottom-[63%] w-[4%] h-[27%] bg-[#5e4733]" />
+          <div className="absolute left-[31%] right-[31%] bottom-[86%] h-[22%] bg-cream-100 rounded-t-full rounded-b-md shadow-[0_0_20px_rgba(255,243,214,0.62)]" />
+          <div className="absolute left-[13%] bottom-[63%] w-[11%] h-[12%] bg-sage-700 rounded-b-full rounded-t-sm" />
+          <div className="absolute left-[7%] bottom-[74%] w-[9%] h-[14%] bg-sage-600 rounded-full -rotate-12" />
+          <div className="absolute left-[20%] bottom-[75%] w-[8%] h-[13%] bg-sage-500 rounded-full rotate-12" />
+        </div>
+
+        {/* The mounted print, anchored above the room setting, sized to scale */}
+        <div
+          className="absolute -translate-x-1/2 transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]"
+          style={{
+            left: `${cmToWidthPct(ROOM_SCALE.print.centerLeft)}%`,
+            height: `${printHeightPct}%`,
+            aspectRatio,
+            bottom: `${cmToHeightPct(ROOM_SCALE.print.bottom)}%`,
+          }}
+        >
+          <div className="relative w-full h-full transition-all duration-500">
+            {isFramed ? (
+              <div
+                className="absolute -inset-[7%] ring-1 ring-black/10"
+                style={frameStyle}
+              />
+            ) : null}
+            <div className="absolute inset-0 bg-cream-50 p-[8%] shadow-[0_14px_30px_rgba(15,15,15,0.22)] ring-1 ring-cream-200">
+              <img
+                src={artwork.imageUrl}
+                alt={`${artwork.title} preview at ${size}`}
+                className="w-full h-full object-cover block"
+                draggable={false}
+              />
+            </div>
           </div>
         </div>
 
         {/* Reference scale marker */}
         <div className="absolute right-3 top-3 text-[10px] text-ink-700/70 bg-white/85 backdrop-blur-sm px-2 py-0.5 rounded-md shadow-sm">
-          {meta.cm.join("×")} cm
+          {meta.cm.join("×")} cm total mounted
+        </div>
+        <div className="absolute left-3 bottom-3 text-[10px] text-ink-700/65 bg-white/75 backdrop-blur-sm px-2 py-0.5 rounded-md shadow-sm">
+          Approx. room scale
         </div>
       </div>
     </div>
@@ -155,7 +217,7 @@ export default function ArtworkPage() {
     if (!m) return "";
     const [wCM, hCM] = m.cm;
     const [wIN, hIN] = m.in;
-    return `${m.label} · ${wIN}×${hIN}in / ${wCM}×${hCM}cm${m.mounted ? " · mounted" : ""}`;
+    return `${m.label} · ${wIN}×${hIN}in / ${wCM}×${hCM}cm total mounted size`;
   }, [size]);
 
   if (loading) {
@@ -177,7 +239,7 @@ export default function ArtworkPage() {
     <div className="min-h-screen bg-cream-50">
       <SEO
         title={artwork.title}
-        description={`${artwork.title} — fine-art botanical print by Mairead. Available in three sizes, framed or unframed, with secure checkout.`}
+        description={`${artwork.title} - mounted fine-art botanical print by Mairead. Available in three total mounted sizes, framed or unframed, with secure checkout.`}
         image={artwork.imageUrl}
         type="product"
       />
@@ -217,7 +279,7 @@ export default function ArtworkPage() {
               {artwork.title}
             </h1>
             <p className="mt-2 text-ink-700/80 leading-relaxed">
-              Own a piece of artistic elegance. Printed with archival inks on
+              Own a mounted botanical photograph printed with archival inks on
               premium stock.
             </p>
 
@@ -228,7 +290,7 @@ export default function ArtworkPage() {
                   Size
                 </span>
                 <span className="text-xs text-ink-700/70">
-                  {SIZE_META[size]?.in.join("×")}in
+                  {SIZE_META[size]?.in.join("×")}in total mounted size
                 </span>
               </div>
               <div className="grid grid-cols-3 gap-2">
@@ -253,6 +315,10 @@ export default function ArtworkPage() {
                   );
                 })}
               </div>
+              <p className="mt-3 rounded-xl border border-sage-100 bg-white px-4 py-3 text-sm leading-relaxed text-ink-700/80">
+                All photographs are supplied mounted with a white/cream
+                surround. Dimensions shown are the total mounted size.
+              </p>
             </div>
 
             {/* Framing */}
@@ -276,10 +342,13 @@ export default function ArtworkPage() {
                   }`}
                 >
                   <div className="text-sm font-semibold text-ink-900">Unframed</div>
-                  <div className="text-xs text-ink-700/70 mt-0.5">Free shipping</div>
+                  <div className="text-xs text-ink-700/70 mt-0.5">
+                    Mounted print, no frame
+                  </div>
                 </button>
                 {frameOptions.map((f) => {
                   const active = frame === f;
+                  const swatchStyle = getFrameStyle(f);
                   return (
                     <button
                       key={f}
@@ -291,7 +360,14 @@ export default function ArtworkPage() {
                           : "border-sage-200 bg-white hover:border-sage-400"
                       }`}
                     >
-                      <div className="text-sm font-semibold text-ink-900">{f}</div>
+                      <div className="flex items-center gap-2 text-sm font-semibold text-ink-900">
+                        <span
+                          className="h-4 w-4 rounded-full ring-1 ring-ink-900/10"
+                          style={swatchStyle}
+                          aria-hidden="true"
+                        />
+                        {f}
+                      </div>
                       <div className="text-xs text-ink-700/70 mt-0.5">
                         +€{FRAME_SURCHARGE}
                       </div>
