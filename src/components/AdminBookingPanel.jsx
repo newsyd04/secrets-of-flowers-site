@@ -12,7 +12,7 @@ function authHeaders() {
 
 function emptySlots(timeSlots, open = true) {
   return Object.fromEntries(
-    timeSlots.map((slot) => [slot.time, { open, capacity: "" }])
+    timeSlots.map((slot) => [slot.time, { open }])
   );
 }
 
@@ -24,12 +24,18 @@ function withoutSlot(slots, time) {
 
 function normalizeSettings(data) {
   const timeSlots = data?.timeSlots?.length ? data.timeSlots : [DEFAULT_SLOT];
+  const normalizeSlotMap = (slots, fallbackOpen = true) =>
+    Object.fromEntries(
+      Object.entries({ ...emptySlots(timeSlots, fallbackOpen), ...(slots || {}) }).map(
+        ([time, config]) => [time, { open: config?.open !== false }]
+      )
+    );
+
   return {
     defaultCapacity: data?.defaultCapacity || 1,
     timeSlots: timeSlots.map((slot) => ({
       time: slot.time,
       enabled: slot.enabled !== false,
-      capacity: slot.capacity || "",
     })),
     weeklyRules: DAY_LABELS.map((label, day) => {
       const existing = data?.weeklyRules?.find((rule) => rule.day === day) || {};
@@ -37,7 +43,7 @@ function normalizeSettings(data) {
         day,
         label,
         open: existing.open !== false,
-        slots: { ...emptySlots(timeSlots), ...(existing.slots || {}) },
+        slots: normalizeSlotMap(existing.slots),
       };
     }),
     dateExceptions: (data?.dateExceptions || []).map((ex) => ({
@@ -45,7 +51,7 @@ function normalizeSettings(data) {
       open: ex.open !== false,
       note: ex.note || "",
       capacity: ex.capacity || "",
-      slots: { ...emptySlots(timeSlots, ex.open !== false), ...(ex.slots || {}) },
+      slots: normalizeSlotMap(ex.slots, ex.open !== false),
     })),
   };
 }
@@ -56,7 +62,8 @@ function slotStatusClass(status) {
 }
 
 function formatBookingDate(dateString) {
-  const parsed = new Date(`${dateString}T00:00:00`);
+  const normalized = String(dateString || "").slice(0, 10);
+  const parsed = new Date(`${normalized}T00:00:00`);
   if (Number.isNaN(parsed.getTime())) return dateString;
   return parsed.toLocaleDateString(undefined, {
     weekday: "long",
@@ -64,6 +71,12 @@ function formatBookingDate(dateString) {
     day: "numeric",
     year: "numeric",
   });
+}
+
+function isUpcomingBooking(booking) {
+  const date = String(booking.date || "").slice(0, 10);
+  const today = new Date().toISOString().slice(0, 10);
+  return date >= today;
 }
 
 function mailtoHref(booking, mode = "confirmation") {
@@ -123,8 +136,16 @@ export default function AdminBookingPanel() {
   const upcomingBookings = useMemo(
     () =>
       bookings
-        .filter((booking) => booking.status !== "cancelled")
+        .filter((booking) => booking.status !== "cancelled" && isUpcomingBooking(booking))
         .sort((a, b) => `${a.date} ${a.time}`.localeCompare(`${b.date} ${b.time}`)),
+    [bookings]
+  );
+
+  const oldActiveBookings = useMemo(
+    () =>
+      bookings
+        .filter((booking) => booking.status !== "cancelled" && !isUpcomingBooking(booking))
+        .sort((a, b) => `${b.date} ${b.time}`.localeCompare(`${a.date} ${a.time}`)),
     [bookings]
   );
 
@@ -213,7 +234,23 @@ export default function AdminBookingPanel() {
       await fetchAdminData();
     } catch (error) {
       console.error("Cancel booking failed:", error);
-      alert("Could not cancel booking.");
+      alert(error?.response?.data?.message || "Could not cancel booking.");
+    }
+  };
+
+  const deleteBookingRecord = async (booking) => {
+    const label = `${booking.name || booking.email || "this booking"} on ${formatBookingDate(
+      booking.date
+    )}`;
+    if (!window.confirm(`Permanently delete the record for ${label}?`)) return;
+    try {
+      await axios.delete(`${API_BASE}/bookings/${booking._id}/permanent`, {
+        headers: authHeaders(),
+      });
+      await fetchAdminData();
+    } catch (error) {
+      console.error("Delete booking failed:", error);
+      alert(error?.response?.data?.message || "Could not delete booking.");
     }
   };
 
@@ -291,7 +328,7 @@ export default function AdminBookingPanel() {
                   <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
                     <div>
                       <div className="font-semibold text-ink-900">
-                        {booking.name || "Guest"} · {booking.date} at {booking.time}
+                        {booking.name || "Guest"} · {formatBookingDate(booking.date)} at {booking.time}
                       </div>
                       <div className="mt-1 text-sm text-ink-700/70">
                         {booking.email} · {booking.partySize || 1} people
@@ -318,6 +355,13 @@ export default function AdminBookingPanel() {
                       >
                         Cancel
                       </button>
+                      <button
+                        type="button"
+                        onClick={() => deleteBookingRecord(booking)}
+                        className="inline-flex items-center justify-center rounded-full border border-ink-700/20 px-4 py-2 text-sm font-semibold text-ink-700 hover:bg-ink-700/5 transition"
+                      >
+                        Delete record
+                      </button>
                     </div>
                   </div>
                 </div>
@@ -329,9 +373,9 @@ export default function AdminBookingPanel() {
         <section className="bg-white rounded-2xl border border-sage-100 shadow-sm p-8">
           <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
             <div>
-              <h2 className="text-xl font-semibold text-ink-900">Booking capacity</h2>
+              <h2 className="text-xl font-semibold text-ink-900">Booking settings</h2>
               <p className="mt-1 text-sm text-ink-700/70">
-                Default places apply unless a time or exception overrides them.
+                Set the normal group size, times, and open days.
               </p>
             </div>
             <Button type="button" variant="primary" size="sm" onClick={saveSettings} disabled={saving}>
@@ -340,7 +384,7 @@ export default function AdminBookingPanel() {
           </div>
 
           <label className="mt-6 block">
-            <span className="text-sm font-medium text-ink-700">Default places per slot</span>
+            <span className="text-sm font-medium text-ink-700">Default places for each time</span>
             <input
               type="number"
               min="1"
@@ -361,7 +405,7 @@ export default function AdminBookingPanel() {
               {settings.timeSlots.map((slot, index) => (
                 <div
                   key={slot.time}
-                  className="grid grid-cols-1 sm:grid-cols-[1fr_auto_auto_auto] gap-2 rounded-xl border border-sage-100 bg-cream-50 p-3"
+                  className="grid grid-cols-1 sm:grid-cols-[minmax(0,1fr)_auto_auto] gap-2 rounded-xl border border-sage-100 bg-cream-50 p-3"
                 >
                   <input
                     type="text"
@@ -398,21 +442,6 @@ export default function AdminBookingPanel() {
                     }
                     className="rounded-lg border border-sage-200 bg-white px-3 py-2 text-sm"
                   />
-                  <input
-                    type="number"
-                    min="1"
-                    placeholder="Capacity"
-                    value={slot.capacity || ""}
-                    onChange={(e) =>
-                      updateSettings((current) => ({
-                        ...current,
-                        timeSlots: current.timeSlots.map((item, i) =>
-                          i === index ? { ...item, capacity: e.target.value } : item
-                        ),
-                      }))
-                    }
-                    className="rounded-lg border border-sage-200 bg-white px-3 py-2 text-sm sm:w-28"
-                  />
                   <label className="inline-flex items-center gap-2 text-sm text-ink-700">
                     <input
                       type="checkbox"
@@ -431,7 +460,7 @@ export default function AdminBookingPanel() {
                   <button
                     type="button"
                     onClick={() => removeTimeSlot(slot.time)}
-                    className="rounded-lg border border-red-200 px-3 py-2 text-sm font-semibold text-red-700 hover:bg-red-50"
+                    className="w-full rounded-lg border border-red-200 px-3 py-2 text-sm font-semibold text-red-700 hover:bg-red-50 sm:w-auto"
                   >
                     Remove
                   </button>
@@ -457,7 +486,7 @@ export default function AdminBookingPanel() {
       <section className="bg-white rounded-2xl border border-sage-100 shadow-sm p-8">
         <h2 className="text-xl font-semibold text-ink-900">Weekly availability</h2>
         <p className="mt-1 text-sm text-ink-700/70">
-          Close normal days or individual times as a permanent rule.
+          Choose which normal days and times are open.
         </p>
         <div className="mt-6 grid grid-cols-1 lg:grid-cols-2 gap-4">
           {settings.weeklyRules.map((rule, ruleIndex) => (
@@ -486,7 +515,7 @@ export default function AdminBookingPanel() {
                   return (
                     <div
                       key={slot.time}
-                      className="grid grid-cols-[1fr_auto_auto] gap-2 items-center text-sm"
+                      className="grid grid-cols-[1fr_auto] gap-2 items-center text-sm"
                     >
                       <span>{slot.time}</span>
                       <label className="inline-flex items-center gap-1">
@@ -515,29 +544,6 @@ export default function AdminBookingPanel() {
                         />
                         Open
                       </label>
-                      <input
-                        type="number"
-                        min="1"
-                        placeholder="Cap"
-                        value={config.capacity || ""}
-                        onChange={(e) =>
-                          updateSettings((current) => ({
-                            ...current,
-                            weeklyRules: current.weeklyRules.map((item, i) =>
-                              i === ruleIndex
-                                ? {
-                                    ...item,
-                                    slots: {
-                                      ...item.slots,
-                                      [slot.time]: { ...config, capacity: e.target.value },
-                                    },
-                                  }
-                                : item
-                            ),
-                          }))
-                        }
-                        className="w-20 rounded-lg border border-sage-200 bg-white px-2 py-1"
-                      />
                     </div>
                   );
                 })}
@@ -552,7 +558,7 @@ export default function AdminBookingPanel() {
           <div>
             <h2 className="text-xl font-semibold text-ink-900">Date exceptions</h2>
             <p className="mt-1 text-sm text-ink-700/70">
-              Override one-off days for holidays, weekends away, or extra availability.
+              Close one-off days, open extra days, or change places for a specific date.
             </p>
           </div>
           <Button
@@ -623,7 +629,7 @@ export default function AdminBookingPanel() {
                   <input
                     type="number"
                     min="1"
-                    placeholder="Capacity"
+                    placeholder="Places override"
                     value={ex.capacity || ""}
                     onChange={(e) =>
                       updateSettings((current) => ({
@@ -695,32 +701,6 @@ export default function AdminBookingPanel() {
                           />
                           Open
                         </label>
-                        <input
-                          type="number"
-                          min="1"
-                          placeholder="Capacity"
-                          value={config.capacity || ""}
-                          onChange={(e) =>
-                            updateSettings((current) => ({
-                              ...current,
-                              dateExceptions: current.dateExceptions.map((item, i) =>
-                                i === exIndex
-                                  ? {
-                                      ...item,
-                                      slots: {
-                                        ...item.slots,
-                                        [slot.time]: {
-                                          ...config,
-                                          capacity: e.target.value,
-                                        },
-                                      },
-                                    }
-                                  : item
-                              ),
-                            }))
-                          }
-                          className="mt-2 w-full rounded-lg border border-sage-200 bg-cream-50 px-3 py-2 text-sm"
-                        />
                       </div>
                     );
                   })}
@@ -747,6 +727,34 @@ export default function AdminBookingPanel() {
                 >
                   Email customer
                 </a>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {oldActiveBookings.length > 0 && (
+        <section className="bg-white rounded-2xl border border-sage-100 shadow-sm p-8">
+          <h2 className="text-xl font-semibold text-ink-900">Old active records</h2>
+          <p className="mt-1 text-sm text-ink-700/70">
+            These are older records that can be cleaned up without affecting future availability.
+          </p>
+          <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-3">
+            {oldActiveBookings.map((booking) => (
+              <div key={booking._id} className="rounded-xl border border-sage-100 bg-cream-50 p-4 text-sm">
+                <div className="font-semibold text-ink-900">
+                  {booking.name || "Guest"} · {formatBookingDate(booking.date)} at {booking.time}
+                </div>
+                <div className="text-ink-700/70">
+                  {booking.email || "No email"} · {booking.partySize || 1} people
+                </div>
+                <button
+                  type="button"
+                  onClick={() => deleteBookingRecord(booking)}
+                  className="mt-3 inline-flex items-center justify-center rounded-full border border-ink-700/20 px-3 py-1.5 text-xs font-semibold text-ink-700 hover:bg-ink-700/5 transition"
+                >
+                  Delete record
+                </button>
               </div>
             ))}
           </div>
