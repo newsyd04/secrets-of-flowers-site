@@ -23,6 +23,6 @@ Booking emails are sent by the backend through Resend:
 
 ```bash
 RESEND_API_KEY=your-resend-api-key
-BOOKING_EMAIL_FROM=Secrets of Flowers <bookings@secretsofflowers.com>
+BOOKING_EMAIL_FROM=Secrets of Flowers <mairead@secretsofflowers.com>
 SHOP_OWNER_EMAIL=mairead@secretsofflowers.com
 ```
