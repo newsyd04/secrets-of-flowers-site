@@ -7,15 +7,21 @@ import FadeIn from "../components/FadeIn";
 import SEO from "../components/SEO";
 
 const SOCIALS = [
-  { href: "#", icon: "fa-brands fa-facebook", label: "Facebook" },
-  { href: "#", icon: "fa-brands fa-instagram", label: "Instagram" },
-  { href: "#", icon: "fa-brands fa-twitter", label: "Twitter" },
+  {
+    href: "https://www.facebook.com/maireadssecretsofflowers/photos_by",
+    icon: "fa-brands fa-facebook",
+    label: "Facebook",
+  },
+  {
+    href: "https://www.instagram.com/mysecretsofflowers/",
+    icon: "fa-brands fa-instagram",
+    label: "Instagram",
+  },
 ];
 
 const CONTACT_INFO = [
   { icon: "fa-solid fa-location-dot", label: "Studio", value: "Tralee, Co. Kerry, Ireland" },
   { icon: "fa-solid fa-envelope", label: "Email", value: "mairead@secretsofflowers.com", href: "mailto:mairead@secretsofflowers.com" },
-  { icon: "fa-solid fa-phone", label: "Phone", value: "+123-456-7890" },
 ];
 
 export default function ContactPage() {
@@ -87,6 +93,8 @@ export default function ContactPage() {
                     key={s.label}
                     href={s.href}
                     aria-label={s.label}
+                    target="_blank"
+                    rel="noreferrer"
                     className="inline-flex w-11 h-11 items-center justify-center rounded-full bg-sage-100 hover:bg-sage-200 text-sage-700 transition"
                   >
                     <i className={`${s.icon} text-lg`} />

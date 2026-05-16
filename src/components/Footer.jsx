@@ -10,9 +10,16 @@ const QUICK_LINKS = [
 ];
 
 const SOCIALS = [
-  { href: "#", icon: "fa-brands fa-facebook", label: "Facebook" },
-  { href: "#", icon: "fa-brands fa-instagram", label: "Instagram" },
-  { href: "#", icon: "fa-brands fa-twitter", label: "Twitter" },
+  {
+    href: "https://www.facebook.com/maireadssecretsofflowers/photos_by",
+    icon: "fa-brands fa-facebook",
+    label: "Facebook",
+  },
+  {
+    href: "https://www.instagram.com/mysecretsofflowers/",
+    icon: "fa-brands fa-instagram",
+    label: "Instagram",
+  },
 ];
 
 export default function Footer() {
@@ -35,6 +42,8 @@ export default function Footer() {
                   key={s.label}
                   href={s.href}
                   aria-label={s.label}
+                  target="_blank"
+                  rel="noreferrer"
                   className="inline-flex w-10 h-10 items-center justify-center rounded-full bg-white/10 hover:bg-white/20 transition"
                 >
                   <i className={`${s.icon} text-base`} />
@@ -71,10 +80,6 @@ export default function Footer() {
               <li className="flex items-start gap-3">
                 <i className="fa-solid fa-location-dot mt-1 text-sage-300" />
                 <span>Tralee, Co. Kerry, Ireland</span>
-              </li>
-              <li className="flex items-start gap-3">
-                <i className="fa-solid fa-phone mt-1 text-sage-300" />
-                <span>+123-456-7890</span>
               </li>
               <li className="flex items-start gap-3">
                 <i className="fa-solid fa-envelope mt-1 text-sage-300" />

@@ -153,64 +153,9 @@ function BenefitsStrip() {
   );
 }
 
-/** —— TESTIMONIALS —— */
-function Testimonials() {
-  const quotes = [
-    {
-      text: "The print arrived beautifully packaged and the colours are even better in person. It's the centrepiece of our hallway now.",
-      name: "Sarah M.",
-      location: "Cork",
-    },
-    {
-      text: "I joined one of Mairead's photography walks and learned more in two hours than in a year of fiddling on my own. Calm, generous and inspiring.",
-      name: "Niamh O.",
-      location: "Tralee",
-    },
-    {
-      text: "Bought two pieces from the Hope collection as a gift — wrapped to perfection and delivered quickly. Will definitely be back.",
-      name: "Aoife C.",
-      location: "Killarney",
-    },
-  ];
-
-  return (
-    <Section tone="sage-soft">
-      <FadeIn className="text-center max-w-2xl mx-auto">
-        <p className="text-sage-700 text-xs uppercase tracking-[0.2em] mb-3">
-          Kind words
-        </p>
-        <h2 className="text-3xl md:text-4xl font-semibold">From recent collectors</h2>
-        <span className="block w-16 h-[3px] bg-sage-500 rounded-full mt-4 mx-auto" />
-      </FadeIn>
-
-      <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
-        {quotes.map((q, i) => (
-          <FadeIn
-            key={i}
-            delay={i * 0.1}
-            className="relative bg-white rounded-2xl border border-sage-100 p-7 pt-12 shadow-sm"
-          >
-            <span
-              aria-hidden
-              className="absolute top-4 left-6 font-Italianno text-7xl leading-none text-sage-300 select-none"
-            >
-              "
-            </span>
-            <p className="text-ink-700 leading-relaxed">{q.text}</p>
-            <div className="mt-5 pt-4 border-t border-sage-100 text-sm">
-              <span className="text-ink-900 font-semibold">{q.name}</span>
-              <span className="text-ink-700/70"> · {q.location}</span>
-            </div>
-          </FadeIn>
-        ))}
-      </div>
-    </Section>
-  );
-}
-
 /** —— SOCIAL TWO-UP —— */
 function SocialTwoUp() {
-  const IG_URL = "https://instagram.com/YOUR_USERNAME";
+  const IG_URL = "https://www.instagram.com/mysecretsofflowers/";
   const FB_PAGE_URL = "https://www.facebook.com/maireadssecretsofflowers/photos_by";
 
   return (
@@ -338,7 +283,6 @@ export default function HomePage() {
 
       <FavouritePieces />
       <BenefitsStrip />
-      <Testimonials />
       <SocialTwoUp />
     </>
   );
