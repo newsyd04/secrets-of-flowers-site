@@ -317,7 +317,7 @@ export default function BookingPage() {
                   {submitting ? "Sending..." : "Confirm Booking"}
                 </Button>
                 <p className="mt-3 text-xs text-ink-700/60 text-center">
-                  You will receive a confirmation email after booking.
+                  Your booking is confirmed immediately, and a confirmation email will be sent.
                 </p>
               </div>
             </div>

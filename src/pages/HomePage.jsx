@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import "@fortawesome/fontawesome-free/css/all.min.css";
-import bg from "../assets/painting-bg.jpg";
+import bg from "../assets/newhero.jpg";
 import { Link } from "react-router-dom";
 import axios from "axios";
 import Section from "../components/Section";

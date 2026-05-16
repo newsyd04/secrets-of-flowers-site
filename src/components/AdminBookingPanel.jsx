@@ -55,11 +55,69 @@ function slotStatusClass(status) {
   return "bg-sage-100 text-sage-800";
 }
 
+function formatBookingDate(dateString) {
+  const parsed = new Date(`${dateString}T00:00:00`);
+  if (Number.isNaN(parsed.getTime())) return dateString;
+  return parsed.toLocaleDateString(undefined, {
+    weekday: "long",
+    month: "long",
+    day: "numeric",
+    year: "numeric",
+  });
+}
+
+function mailtoHref(booking, mode = "confirmation") {
+  const name = booking.name || "there";
+  const date = formatBookingDate(booking.date);
+  const people = booking.partySize || 1;
+  const subject =
+    mode === "cancelled"
+      ? "Your Secrets of Flowers booking"
+      : "Your Secrets of Flowers booking is confirmed";
+  const body =
+    mode === "cancelled"
+      ? `Hi ${name},
+
+I'm getting in touch about your Secrets of Flowers photography walk booking for ${date} at ${booking.time}.
+
+Booking details:
+Name: ${booking.name || "Guest"}
+Date: ${date}
+Time: ${booking.time}
+People: ${people}
+
+This booking has been cancelled. If you would like to arrange another time, please reply to this email and I will help.
+
+Warm wishes,
+Mairead
+Secrets of Flowers`
+      : `Hi ${name},
+
+Thank you for booking a Secrets of Flowers photography walk. Your booking is confirmed.
+
+Booking details:
+Name: ${booking.name || "Guest"}
+Date: ${date}
+Time: ${booking.time}
+People: ${people}
+
+I will be in touch before the day if any meeting point or weather details need to be confirmed.
+
+Warm wishes,
+Mairead
+Secrets of Flowers`;
+
+  return `mailto:${booking.email}?subject=${encodeURIComponent(
+    subject
+  )}&body=${encodeURIComponent(body)}`;
+}
+
 export default function AdminBookingPanel() {
   const [bookings, setBookings] = useState([]);
   const [settings, setSettings] = useState(null);
   const [newTime, setNewTime] = useState("");
   const [saving, setSaving] = useState(false);
+  const [bulkCancelling, setBulkCancelling] = useState(false);
   const [loading, setLoading] = useState(true);
 
   const upcomingBookings = useMemo(
@@ -159,6 +217,33 @@ export default function AdminBookingPanel() {
     }
   };
 
+  const cancelUpcomingBookings = async () => {
+    if (upcomingBookings.length === 0) return;
+    const message = `Cancel all ${upcomingBookings.length} upcoming booking${
+      upcomingBookings.length === 1 ? "" : "s"
+    }? This frees those places and sends cancellation emails where possible.`;
+    if (!window.confirm(message)) return;
+
+    setBulkCancelling(true);
+    try {
+      const res = await axios.delete(`${API_BASE}/bookings/upcoming`, {
+        headers: authHeaders(),
+      });
+      const failed = res.data?.failedEmailCount || 0;
+      await fetchAdminData();
+      alert(
+        `Cancelled ${res.data?.cancelledCount || 0} upcoming booking${
+          res.data?.cancelledCount === 1 ? "" : "s"
+        }.${failed ? ` ${failed} cancellation email${failed === 1 ? "" : "s"} failed.` : ""}`
+      );
+    } catch (error) {
+      console.error("Bulk cancel bookings failed:", error);
+      alert("Could not cancel upcoming bookings.");
+    } finally {
+      setBulkCancelling(false);
+    }
+  };
+
   if (loading || !settings) {
     return (
       <div className="bg-white rounded-2xl border border-sage-100 p-8 text-ink-700/70">
@@ -175,12 +260,23 @@ export default function AdminBookingPanel() {
             <div>
               <h2 className="text-xl font-semibold text-ink-900">Upcoming bookings</h2>
               <p className="mt-1 text-sm text-ink-700/70">
-                Cancel a booking to free places and notify the customer.
+                Cancel a booking to free places and send a cancellation email.
               </p>
             </div>
-            <Button type="button" variant="secondary" size="sm" onClick={fetchAdminData}>
-              Refresh
-            </Button>
+            <div className="flex flex-wrap justify-end gap-2">
+              <Button type="button" variant="outline" size="sm" onClick={fetchAdminData}>
+                Refresh
+              </Button>
+              <Button
+                type="button"
+                variant="secondary"
+                size="sm"
+                onClick={cancelUpcomingBookings}
+                disabled={bulkCancelling || upcomingBookings.length === 0}
+              >
+                {bulkCancelling ? "Cancelling..." : "Cancel all upcoming"}
+              </Button>
+            </div>
           </div>
 
           <div className="mt-6 space-y-3">
@@ -208,13 +304,21 @@ export default function AdminBookingPanel() {
                         {booking.status || "confirmed"}
                       </span>
                     </div>
-                    <button
-                      type="button"
-                      onClick={() => cancelBooking(booking)}
-                      className="inline-flex items-center justify-center rounded-full border border-red-200 px-4 py-2 text-sm font-semibold text-red-700 hover:bg-red-50 transition"
-                    >
-                      Cancel
-                    </button>
+                    <div className="flex flex-wrap gap-2 sm:justify-end">
+                      <a
+                        href={mailtoHref(booking)}
+                        className="inline-flex items-center justify-center rounded-full border border-sage-200 px-4 py-2 text-sm font-semibold text-sage-700 hover:bg-sage-50 transition"
+                      >
+                        Email customer
+                      </a>
+                      <button
+                        type="button"
+                        onClick={() => cancelBooking(booking)}
+                        className="inline-flex items-center justify-center rounded-full border border-red-200 px-4 py-2 text-sm font-semibold text-red-700 hover:bg-red-50 transition"
+                      >
+                        Cancel
+                      </button>
+                    </div>
                   </div>
                 </div>
               ))
@@ -223,10 +327,17 @@ export default function AdminBookingPanel() {
         </section>
 
         <section className="bg-white rounded-2xl border border-sage-100 shadow-sm p-8">
-          <h2 className="text-xl font-semibold text-ink-900">Booking capacity</h2>
-          <p className="mt-1 text-sm text-ink-700/70">
-            Default places apply unless a time or exception overrides them.
-          </p>
+          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+            <div>
+              <h2 className="text-xl font-semibold text-ink-900">Booking capacity</h2>
+              <p className="mt-1 text-sm text-ink-700/70">
+                Default places apply unless a time or exception overrides them.
+              </p>
+            </div>
+            <Button type="button" variant="primary" size="sm" onClick={saveSettings} disabled={saving}>
+              {saving ? "Saving..." : "Save booking settings"}
+            </Button>
+          </div>
 
           <label className="mt-6 block">
             <span className="text-sm font-medium text-ink-700">Default places per slot</span>
@@ -630,17 +741,17 @@ export default function AdminBookingPanel() {
                   {booking.name || "Guest"} · {booking.date} at {booking.time}
                 </div>
                 <div className="text-ink-700/70">{booking.email}</div>
+                <a
+                  href={mailtoHref(booking, "cancelled")}
+                  className="mt-3 inline-flex items-center justify-center rounded-full border border-sage-200 px-3 py-1.5 text-xs font-semibold text-sage-700 hover:bg-sage-50 transition"
+                >
+                  Email customer
+                </a>
               </div>
             ))}
           </div>
         </section>
       )}
-
-      <div className="sticky bottom-4 z-10 flex justify-end">
-        <Button type="button" variant="primary" size="md" onClick={saveSettings} disabled={saving}>
-          {saving ? "Saving..." : "Save booking settings"}
-        </Button>
-      </div>
     </div>
   );
 }
