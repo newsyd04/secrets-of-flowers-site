@@ -5,7 +5,7 @@ import { PayPalButtons, PayPalScriptProvider } from "@paypal/react-paypal-js";
 
 import Container from "../components/Container";
 import SEO from "../components/SEO";
-import { API_BASE, PAYPAL_CLIENT_ID } from "../config/api";
+import { API_BASE, IS_PAYPAL_CONFIGURED, PAYPAL_CLIENT_ID } from "../config/api";
 
 const FRAME_SURCHARGE = 35;
 const SIZE_UPCHARGE = { Small: 0, Medium: 10, Large: 45 };
@@ -397,66 +397,72 @@ export default function ArtworkPage() {
               </div>
 
               <div className="mt-5">
-                <PayPalScriptProvider
-                  options={{
-                    "client-id": PAYPAL_CLIENT_ID,
-                    currency: "EUR",
-                  }}
-                >
-                  <PayPalButtons
-                    style={{ layout: "horizontal", color: "black", shape: "pill", label: "checkout" }}
-                    createOrder={async () => {
-                      const response = await axios.post(
-                        `${API_BASE}/create-paypal-order`,
-                        { artworkId: artwork._id, size, frame }
-                      );
-                      return response.data.id;
+                {IS_PAYPAL_CONFIGURED ? (
+                  <PayPalScriptProvider
+                    options={{
+                      "client-id": PAYPAL_CLIENT_ID,
+                      currency: "EUR",
                     }}
-                    onApprove={async (data) => {
-                      try {
-                        const res = await axios.post(
-                          `${API_BASE}/capture-paypal-order`,
-                          { orderId: data.orderID, artworkId: artwork._id, size, frame }
+                  >
+                    <PayPalButtons
+                      style={{ layout: "horizontal", color: "black", shape: "pill", label: "checkout" }}
+                      createOrder={async () => {
+                        const response = await axios.post(
+                          `${API_BASE}/create-paypal-order`,
+                          { artworkId: artwork._id, size, frame }
                         );
-                        const payerName =
-                          res.data?.capture?.payer?.name?.given_name ||
-                          res.data?.capture?.payment_source?.paypal?.name?.given_name ||
-                          null;
-                        // Pass details via state for instant render, AND via
-                        // ?orderId= so a refresh can recover from the backend.
-                        navigate(`/order/success?orderId=${encodeURIComponent(data.orderID)}`, {
-                          state: {
-                            payerName,
-                            artworkTitle: artwork.title,
-                            artworkImage: artwork.imageUrl,
-                            size,
-                            frame,
-                            total: price,
-                            orderId: data.orderID,
-                          },
-                        });
-                      } catch (e) {
-                        console.error("Capture failed:", e);
-                        // By the time onApprove fires, PayPal has already
-                        // authorised the user. Whether the capture call
-                        // actually moved money is unknown from the client,
-                        // so we deliberately don't say "you weren't charged."
-                        alert(
-                          "We couldn't confirm your order on our end. " +
-                          "Please don't pay again — email mairead@secretsofflowers.com " +
-                          "with your PayPal order ID and we'll sort it out."
-                        );
-                      }
-                    }}
-                    onError={(err) => {
-                      console.error("PayPal onError:", err);
-                      alert("Payment failed to initialize. Please try again.");
-                    }}
-                    onCancel={() => {
-                      console.warn("PayPal popup closed by user");
-                    }}
-                  />
-                </PayPalScriptProvider>
+                        return response.data.id;
+                      }}
+                      onApprove={async (data) => {
+                        try {
+                          const res = await axios.post(
+                            `${API_BASE}/capture-paypal-order`,
+                            { orderId: data.orderID, artworkId: artwork._id, size, frame }
+                          );
+                          const payerName =
+                            res.data?.capture?.payer?.name?.given_name ||
+                            res.data?.capture?.payment_source?.paypal?.name?.given_name ||
+                            null;
+                          // Pass details via state for instant render, AND via
+                          // ?orderId= so a refresh can recover from the backend.
+                          navigate(`/order/success?orderId=${encodeURIComponent(data.orderID)}`, {
+                            state: {
+                              payerName,
+                              artworkTitle: artwork.title,
+                              artworkImage: artwork.imageUrl,
+                              size,
+                              frame,
+                              total: price,
+                              orderId: data.orderID,
+                            },
+                          });
+                        } catch (e) {
+                          console.error("Capture failed:", e);
+                          // By the time onApprove fires, PayPal has already
+                          // authorised the user. Whether the capture call
+                          // actually moved money is unknown from the client,
+                          // so we deliberately don't say "you weren't charged."
+                          alert(
+                            "We couldn't confirm your order on our end. " +
+                            "Please don't pay again - email mairead@secretsofflowers.com " +
+                            "with your PayPal order ID and we'll sort it out."
+                          );
+                        }
+                      }}
+                      onError={(err) => {
+                        console.error("PayPal onError:", err);
+                        alert("Payment failed to initialize. Please try again.");
+                      }}
+                      onCancel={() => {
+                        console.warn("PayPal popup closed by user");
+                      }}
+                    />
+                  </PayPalScriptProvider>
+                ) : (
+                  <div className="rounded-xl border border-red-100 bg-red-50 px-4 py-3 text-sm text-red-800">
+                    Checkout is temporarily unavailable. PayPal live payments need to be configured.
+                  </div>
+                )}
               </div>
             </div>
 

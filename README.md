@@ -1,9 +1,20 @@
-# React + Vite
+# Secrets of Flowers Site
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+## Live PayPal checkout
 
-Currently, two official plugins are available:
+The frontend needs the live PayPal client id at build time:
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
-# secrets-of-flowers-site
+```bash
+VITE_PAYPAL_CLIENT_ID=your-live-paypal-client-id
+VITE_FLOWERS_API_BASE=https://webdev-backends.onrender.com/flowers
+```
+
+Set these in the Vercel project environment variables, then redeploy the site.
+
+The backend must also have live PayPal credentials configured on Render:
+
+```bash
+PAYPAL_MODE=live
+PAYPAL_CLIENT_ID=your-live-paypal-client-id
+PAYPAL_CLIENT_SECRET=your-live-paypal-secret
+```
