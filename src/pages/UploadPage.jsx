@@ -5,6 +5,7 @@ import PageHeader from "../components/PageHeader";
 import Section from "../components/Section";
 import Button from "../components/Button";
 import SEO from "../components/SEO";
+import AdminBookingPanel from "../components/AdminBookingPanel";
 import { API_BASE } from "../config/api";
 
 const COLLECTIONS = ["The Joy", "Hope", "Sage", "Heart and Soul", "The Irish Boreen"];
@@ -19,6 +20,7 @@ export default function UploadPage() {
   const [frameToggles, setFrameToggles] = useState({});
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [activeTab, setActiveTab] = useState("artwork");
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -105,12 +107,36 @@ export default function UploadPage() {
 
       <PageHeader
         eyebrow="Admin"
-        title="Upload Panel"
-        description="Add new listings, manage frame availability, and curate the public gallery."
+        title="Admin Panel"
+        description="Add listings, manage frame availability, and configure photography walk bookings."
       />
 
       <Section tone="cream">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div className="mb-8 inline-flex rounded-full border border-sage-100 bg-white p-1 shadow-sm">
+          {[
+            ["artwork", "Artwork"],
+            ["bookings", "Bookings"],
+          ].map(([id, label]) => (
+            <button
+              key={id}
+              type="button"
+              onClick={() => setActiveTab(id)}
+              className={`rounded-full px-5 py-2 text-sm font-semibold transition ${
+                activeTab === id
+                  ? "bg-sage-600 text-white"
+                  : "text-ink-700 hover:bg-sage-50"
+              }`}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+
+        {activeTab === "bookings" ? (
+          <AdminBookingPanel />
+        ) : (
+          <>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Upload Form */}
           <div className="bg-white rounded-2xl border border-sage-100 shadow-sm p-8">
             <h2 className="text-xl font-semibold text-ink-900">New listing</h2>
@@ -224,51 +250,50 @@ export default function UploadPage() {
             </div>
           </div>
         </div>
-      </Section>
 
-      {/* Listings */}
-      <Section tone="white">
-        <div className="text-center mb-10">
-          <p className="text-sage-600 text-xs uppercase tracking-[0.2em] mb-3">
-            Live listings
-          </p>
-          <h2 className="text-3xl md:text-4xl font-semibold">
-            Uploaded artwork ({images.length})
-          </h2>
-          <span className="block w-16 h-[3px] bg-sage-400 rounded-full mt-4 mx-auto" />
-        </div>
+          <div className="mt-14 text-center mb-10">
+            <p className="text-sage-600 text-xs uppercase tracking-[0.2em] mb-3">
+              Live listings
+            </p>
+            <h2 className="text-3xl md:text-4xl font-semibold">
+              Uploaded artwork ({images.length})
+            </h2>
+            <span className="block w-16 h-[3px] bg-sage-400 rounded-full mt-4 mx-auto" />
+          </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {images.map((img) => (
-            <div
-              key={img._id}
-              className="bg-white rounded-2xl border border-sage-100 shadow-sm overflow-hidden flex flex-col"
-            >
-              <div className="aspect-[4/5] overflow-hidden bg-cream-100">
-                <img
-                  src={img.imageUrl}
-                  alt={img.title}
-                  loading="lazy"
-                  className="w-full h-full object-cover"
-                />
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {images.map((img) => (
+              <div
+                key={img._id}
+                className="bg-white rounded-2xl border border-sage-100 shadow-sm overflow-hidden flex flex-col"
+              >
+                <div className="aspect-[4/5] overflow-hidden bg-cream-100">
+                  <img
+                    src={img.imageUrl}
+                    alt={img.title}
+                    loading="lazy"
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <div className="p-5 flex-1 flex flex-col">
+                  <h3 className="font-semibold text-ink-900">{img.title}</h3>
+                  <p className="text-sm text-ink-700/70 mt-1">€{img.price}</p>
+                  <p className="text-xs uppercase tracking-[0.18em] text-sage-700 mt-2">
+                    {img.collection}
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => deleteImage(img._id)}
+                    className="mt-5 inline-flex items-center justify-center gap-2 px-4 py-2 rounded-full text-sm font-semibold border border-red-200 text-red-700 hover:bg-red-50 transition"
+                  >
+                    <i className="fa-solid fa-trash text-xs" /> Delete
+                  </button>
+                </div>
               </div>
-              <div className="p-5 flex-1 flex flex-col">
-                <h3 className="font-semibold text-ink-900">{img.title}</h3>
-                <p className="text-sm text-ink-700/70 mt-1">€{img.price}</p>
-                <p className="text-xs uppercase tracking-[0.18em] text-sage-700 mt-2">
-                  {img.collection}
-                </p>
-                <button
-                  type="button"
-                  onClick={() => deleteImage(img._id)}
-                  className="mt-5 inline-flex items-center justify-center gap-2 px-4 py-2 rounded-full text-sm font-semibold border border-red-200 text-red-700 hover:bg-red-50 transition"
-                >
-                  <i className="fa-solid fa-trash text-xs" /> Delete
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+          </>
+        )}
       </Section>
     </div>
   );

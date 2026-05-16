@@ -18,3 +18,11 @@ PAYPAL_MODE=live
 PAYPAL_CLIENT_ID=your-live-paypal-client-id
 PAYPAL_CLIENT_SECRET=your-live-paypal-secret
 ```
+
+Booking emails are sent by the backend through Resend:
+
+```bash
+RESEND_API_KEY=your-resend-api-key
+BOOKING_EMAIL_FROM=Secrets of Flowers <bookings@secretsofflowers.com>
+SHOP_OWNER_EMAIL=mairead@secretsofflowers.com
+```
